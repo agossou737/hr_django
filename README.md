@@ -1,4 +1,4 @@
-# HR Django — Logiciel de gestion RH (Django)
+# Ruche RH — Logiciel de gestion RH (Django)
 
 Plateforme RH multi-entreprises pensée pour le marché béninois / zone OHADA, avec pointage par reconnaissance faciale (phase 2).
 
@@ -10,6 +10,14 @@ Plateforme RH multi-entreprises pensée pour le marché béninois / zone OHADA, 
 - Contrats (CDI, CDD, stage, prestation, apprentissage)
 - Tableau de bord (effectifs, dernières embauches, contrats arrivant à échéance)
 - Interface web en français (Tailwind), administration Django
+
+## Interface
+
+Basée sur le template **Lineone** (Tailwind + Alpine.js) dans `static/`. Le nom du produit s'affiche partout via
+`APP_NAME` (variable `.env` ou `config/settings.py`). Le CSS du template étant un build purgé, les classes
+manquantes sont ajoutées dans `static/css/custom.css`.
+
+> Lineone est un template commercial : une licence adaptée est nécessaire pour une revente à des clients.
 
 ## Feuille de route
 
