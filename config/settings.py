@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     "documents",
     "notifications",
     "explanations",
+    "assets",
+    "meetings",
 ]
 
 MIDDLEWARE = [

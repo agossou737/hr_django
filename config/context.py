@@ -84,6 +84,14 @@ SECTIONS = [
         ],
     ),
     (
+        "assets", "Matériel", "tool", STAFF,
+        [("Inventaire", "assets:list", HR), ("Mon matériel", "assets:mine", STAFF)],
+    ),
+    (
+        "meetings", "Réunions", "calendar", STAFF,
+        [("Mes réunions", "meetings:mine", STAFF), ("Toutes les réunions", "meetings:list", HR)],
+    ),
+    (
         "documents", "Documents", "folder", STAFF,
         [("Documents RH", "documents:list", HR), ("Documents à renouveler", "documents:expiring", HR), ("Mes documents", "documents:mine", {"manager", "employee"})],
     ),

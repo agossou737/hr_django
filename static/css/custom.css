@@ -70,3 +70,9 @@ select.form-select { padding-right: 2.25rem; }
 .-top-0\.5{top:-0.125rem}
 .text-\[10px\]{font-size:10px}
 .leading-4{line-height:1rem}
+
+/* Séparateurs de listes (notifications, actions de réunion) */
+.divide-slate-200>:not(:last-child){border-color:#e2e8f0}
+.dark\:divide-navy-500:where(.dark,.dark *)>:not(:last-child){border-color:#384766}
+.hover\:bg-slate-50:hover{background-color:#f8fafc}
+.dark\:hover\:bg-navy-600:where(.dark,.dark *):hover{background-color:#313e59}

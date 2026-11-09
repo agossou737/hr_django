@@ -23,3 +23,20 @@ notification interne et, si SMTP est configuré (`.env.example`), un e-mail. L'e
 ## Permissions (absence de quelques heures)
 Demande par l'employé (date + créneau + motif), validation par le manager/les RH, notification, **autorisation PDF**,
 liste RH exportable.
+
+# Matériel et réunions (étape 8)
+
+## Affectation de matériel
+* *Matériel → Inventaire* : fiche par bien (code inventaire unique, catégorie, n° de série, valeur, état), filtres, export Excel/PDF/CSV.
+* **Affecter** à un employé (un bien ne peut avoir qu'une affectation ouverte) → l'employé est notifié et retrouve sa
+  **décharge PDF** dans *Mon matériel*.
+* **Restitution** : date + état au retour ; un bien en mauvais état passe en « maintenance ». Historique complet conservé.
+* Un bien déjà affecté ne peut ni être supprimé ni réformé ; un bien avec historique ne se supprime pas (on le réforme).
+
+## Réunions et comptes rendus
+* Admin / RH / managers planifient une réunion (date, lieu ou lien visio, ordre du jour, participants) : les participants
+  reçoivent une **convocation** (notification + e-mail + PDF).
+* Après la réunion, l'organisateur (ou les RH) rédige le **compte rendu** : il est publié, les participants sont notifiés
+  et un **PDF de compte rendu** est disponible.
+* **Actions / décisions** : chaque action a un responsable et une échéance ; le responsable est notifié et la coche lui-même.
+* Visibilité : organisateur, participants et RH uniquement (jamais d'autres entreprises).

@@ -22,6 +22,8 @@ urlpatterns = [
     path("documents/", include("documents.urls")),
     path("notifications/", include("notifications.urls")),
     path("explications/", include("explanations.urls")),
+    path("materiel/", include("assets.urls")),
+    path("reunions/", include("meetings.urls")),
     path("parametres/", include("companies.urls")),
 ]
 

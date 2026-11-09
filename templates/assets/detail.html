@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ asset.name }}{% endblock %}
+{% block content %}
+{% with a=asset %}
+<div class="mx-auto max-w-4xl space-y-4">
+<div class="flex flex-wrap items-center justify-between gap-2"><div><h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50">{{ asset.name }}</h2><p class="text-sm text-slate-400">{{ asset.tag|default:"Sans code" }} · {{ asset.get_category_display }} · N° {{ asset.serial_number|default:"—" }} · {{ asset.value|floatformat:"0g" }} FCFA</p></div>
+<div class="flex flex-wrap items-center gap-2">{% include "assets/_badge.html" %}<a class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-100" href="{% url 'assets:update' asset.pk %}">Modifier</a>
+{% if asset.status == "available" %}<a class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus" href="{% url 'assets:assign' asset.pk %}">Affecter</a>{% endif %}
+{% if current %}<a class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus" href="{% url 'assets:return' current.pk %}">Enregistrer la restitution</a>{% endif %}</div></div>
+{% if current %}<div class="card p-4 text-sm">Détenu par <b>{{ current.employee.full_name }}</b> depuis le {{ current.assigned_at|date:"d/m/Y" }} · <a target="_blank" class="text-primary hover:underline" href="{% url 'assets:pdf' current.pk %}">Décharge PDF</a></div>{% endif %}
+<div class="card"><div class="is-scrollbar-hidden min-w-full overflow-x-auto"><table class="w-full text-left">
+<thead><tr><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Employé</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Remis le</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Restitué le</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">État sortie → retour</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5"></th></tr></thead>
+<tbody>{% for h in history %}<tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500"><td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ h.employee.full_name }}</td><td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ h.assigned_at|date:"d/m/Y" }}</td><td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ h.returned_at|date:"d/m/Y"|default:"—" }}</td><td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ h.get_condition_out_display }}{% if h.condition_in %} → {{ h.get_condition_in_display }}{% endif %}</td><td class="whitespace-nowrap px-4 py-3 sm:px-5"><a target="_blank" class="text-primary hover:underline dark:text-accent-light" href="{% url 'assets:pdf' h.pk %}">PDF</a></td></tr>
+{% empty %}<tr><td colspan="5" class="px-5 py-8 text-center text-slate-400">Jamais affecté.</td></tr>{% endfor %}</tbody></table></div></div>
+<div class="flex gap-4 text-sm"><form method="post" action="{% url 'assets:retire' asset.pk %}">{% csrf_token %}<button class="text-warning hover:underline">{% if asset.status == "retired" %}Remettre en service{% else %}Réformer{% endif %}</button></form>
+<form method="post" action="{% url 'assets:delete' asset.pk %}" onsubmit="return confirm('Supprimer ce matériel ?');">{% csrf_token %}<button class="text-error hover:underline">Supprimer</button></form></div>
+</div>
+{% endwith %}
+{% endblock %}
