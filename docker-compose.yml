@@ -1,0 +1,36 @@
+# Déploiement type : PostgreSQL + application. À placer derrière un reverse proxy HTTPS
+# (nginx/Caddy/Traefik) : la caméra du navigateur n'est autorisée qu'en HTTPS.
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ruche
+      POSTGRES_USER: ruche
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?définir DB_PASSWORD dans .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_NAME: ruche
+      DB_USER: ruche
+      DB_HOST: db
+      DEBUG: "False"
+    depends_on: [db]
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - media:/app/media
+      - private:/app/private
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60"
+
+volumes:
+  pgdata:
+  media:
+  private:

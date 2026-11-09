@@ -16,7 +16,7 @@
         <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
           <td class="whitespace-nowrap px-4 py-3 sm:px-5 font-medium text-slate-700 dark:text-navy-100">{{ p.title }}</td>
           <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ p.department|default:"—" }}</td>
-          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ p.base_salary|floatformat:0 }} FCFA</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ p.base_salary|floatformat:"0g" }} FCFA</td>
           <td class="whitespace-nowrap px-4 py-3 sm:px-5 text-right">
             <a class="text-primary hover:underline dark:text-accent-light" href="{% url 'employees:position_update' p.pk %}">Modifier</a>
             <span class="px-1 text-slate-300">·</span>

@@ -10,26 +10,26 @@
 <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
   <div class="card p-5"><h3 class="mb-3 font-medium">Détail du calcul</h3>
     <dl class="space-y-2 text-sm">
-      <div class="flex justify-between"><dt>Salaire de base</dt><dd>{{ payslip.base_salary|floatformat:0 }}</dd></div>
-      {% if payslip.unpaid_deduction %}<div class="flex justify-between"><dt>Absences non rémunérées ({{ payslip.unpaid_days|floatformat:"-1" }} j)</dt><dd class="text-error">− {{ payslip.unpaid_deduction|floatformat:0 }}</dd></div>{% endif %}
-      {% if payslip.extra_earnings %}<div class="flex justify-between"><dt>Primes et indemnités</dt><dd>+ {{ payslip.extra_earnings|floatformat:0 }}</dd></div>{% endif %}
-      <div class="flex justify-between border-t pt-2 font-semibold"><dt>Brut</dt><dd>{{ payslip.gross|floatformat:0 }}</dd></div>
-      <div class="flex justify-between"><dt>CNSS salarié ({{ settings.cnss_employee_rate|floatformat:"-2" }} % de {{ payslip.contribution_base|floatformat:0 }})</dt><dd class="text-error">− {{ payslip.cnss_employee|floatformat:0 }}</dd></div>
-      <div class="flex justify-between"><dt>ITS (base {{ payslip.its_base|floatformat:0 }})</dt><dd class="text-error">− {{ payslip.its|floatformat:0 }}</dd></div>
-      {% if payslip.other_deductions %}<div class="flex justify-between"><dt>Autres retenues</dt><dd class="text-error">− {{ payslip.other_deductions|floatformat:0 }}</dd></div>{% endif %}
-      <div class="flex justify-between border-t pt-2 text-base font-semibold"><dt>Net à payer</dt><dd class="text-success">{{ payslip.net|floatformat:0 }} FCFA</dd></div>
+      <div class="flex justify-between"><dt>Salaire de base</dt><dd>{{ payslip.base_salary|floatformat:"0g" }}</dd></div>
+      {% if payslip.unpaid_deduction %}<div class="flex justify-between"><dt>Absences non rémunérées ({{ payslip.unpaid_days|floatformat:"-1" }} j)</dt><dd class="text-error">− {{ payslip.unpaid_deduction|floatformat:"0g" }}</dd></div>{% endif %}
+      {% if payslip.extra_earnings %}<div class="flex justify-between"><dt>Primes et indemnités</dt><dd>+ {{ payslip.extra_earnings|floatformat:"0g" }}</dd></div>{% endif %}
+      <div class="flex justify-between border-t pt-2 font-semibold"><dt>Brut</dt><dd>{{ payslip.gross|floatformat:"0g" }}</dd></div>
+      <div class="flex justify-between"><dt>CNSS salarié ({{ settings.cnss_employee_rate|floatformat:"-2" }} % de {{ payslip.contribution_base|floatformat:"0g" }})</dt><dd class="text-error">− {{ payslip.cnss_employee|floatformat:"0g" }}</dd></div>
+      <div class="flex justify-between"><dt>ITS (base {{ payslip.its_base|floatformat:"0g" }})</dt><dd class="text-error">− {{ payslip.its|floatformat:"0g" }}</dd></div>
+      {% if payslip.other_deductions %}<div class="flex justify-between"><dt>Autres retenues</dt><dd class="text-error">− {{ payslip.other_deductions|floatformat:"0g" }}</dd></div>{% endif %}
+      <div class="flex justify-between border-t pt-2 text-base font-semibold"><dt>Net à payer</dt><dd class="text-success">{{ payslip.net|floatformat:"0g" }} FCFA</dd></div>
     </dl>
     <h3 class="mb-2 mt-6 font-medium">Charges employeur</h3>
     <dl class="space-y-2 text-sm">
-      <div class="flex justify-between"><dt>CNSS employeur</dt><dd>{{ payslip.cnss_employer|floatformat:0 }}</dd></div>
-      <div class="flex justify-between"><dt>VPS ({{ settings.vps_rate|floatformat:"-2" }} %)</dt><dd>{{ payslip.vps|floatformat:0 }}</dd></div>
-      <div class="flex justify-between border-t pt-2 font-semibold"><dt>Coût total</dt><dd>{{ payslip.employer_cost|floatformat:0 }}</dd></div>
+      <div class="flex justify-between"><dt>CNSS employeur</dt><dd>{{ payslip.cnss_employer|floatformat:"0g" }}</dd></div>
+      <div class="flex justify-between"><dt>VPS ({{ settings.vps_rate|floatformat:"-2" }} %)</dt><dd>{{ payslip.vps|floatformat:"0g" }}</dd></div>
+      <div class="flex justify-between border-t pt-2 font-semibold"><dt>Coût total</dt><dd>{{ payslip.employer_cost|floatformat:"0g" }}</dd></div>
     </dl>
   </div>
   <div class="card p-5"><h3 class="mb-3 font-medium">Primes et retenues du mois</h3>
     <table class="w-full text-sm"><tbody>
     {% for i in items %}<tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500"><td class="py-2">{{ i.label }}<p class="text-xs text-slate-400">{{ i.get_kind_display }}{% if not i.subject_to_contributions %} · non soumis{% endif %}</p></td>
-      <td class="py-2 text-right {% if i.kind == 'deduction' %}text-error{% endif %}">{{ i.amount|floatformat:0 }}</td>
+      <td class="py-2 text-right {% if i.kind == 'deduction' %}text-error{% endif %}">{{ i.amount|floatformat:"0g" }}</td>
       <td class="py-2 text-right">{% if period.is_draft %}<form method="post" action="{% url 'payroll:item_delete' payslip.pk i.pk %}" class="inline">{% csrf_token %}<button class="text-error hover:underline">Retirer</button></form>{% endif %}</td></tr>
     {% empty %}<tr><td class="py-6 text-center text-slate-400">Aucun élément variable.</td></tr>{% endfor %}
     </tbody></table>

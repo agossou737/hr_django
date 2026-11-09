@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Sauvegarde quotidienne : base PostgreSQL + fichiers (logos, photos, CV, documents). À planifier via cron.
+set -euo pipefail
+DEST=/var/backups/ruche-rh/$(date +%F)
+mkdir -p "$DEST"
+pg_dump -U ruche -h localhost ruche | gzip > "$DEST/db.sql.gz"
+tar czf "$DEST/files.tar.gz" -C /srv/ruche-rh media private
+find /var/backups/ruche-rh -mindepth 1 -maxdepth 1 -mtime +30 -exec rm -rf {} +

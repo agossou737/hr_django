@@ -41,4 +41,19 @@ class Command(BaseCommand):
                     company=company, employee=emp, contract_type="cdi",
                     start_date=emp.hire_date, base_salary=salary,
                 )
-        self.stdout.write(self.style.SUCCESS("Démo prête : rh@demo.bj / demo12345"))
+        if not User.objects.filter(email="borne@demo.bj").exists():
+            User.objects.create_user(
+                email="borne@demo.bj", password="demo12345", first_name="Borne", last_name="Accueil",
+                company=company, role=User.Role.KIOSK,
+            )
+        from companies.benin import benin_holidays
+        from companies.models import Holiday
+        from leaves.services import create_default_types
+        from payroll.models import PayrollSettings
+
+        create_default_types(company)
+        PayrollSettings.for_company(company)
+        for d, label in benin_holidays(date.today().year):
+            Holiday.objects.get_or_create(company=company, date=d, defaults={"name": label})
+        self.stdout.write(self.style.SUCCESS(
+            "Démo prête : rh@demo.bj (RH) et borne@demo.bj (borne de pointage), mot de passe demo12345"))

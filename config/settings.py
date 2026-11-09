@@ -1,5 +1,5 @@
 """
-Configuration Django du projet JEV — logiciel de gestion RH (Bénin).
+Configuration Django de Ruche RH — logiciel de gestion RH multi-entreprises (Bénin).
 """
 
 from pathlib import Path
@@ -8,8 +8,13 @@ from decouple import Csv, config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config("SECRET_KEY", default="django-insecure-dev-only-change-me")
+DEV_SECRET_KEY = "django-insecure-dev-only-change-me"
+SECRET_KEY = config("SECRET_KEY", default=DEV_SECRET_KEY)
 DEBUG = config("DEBUG", default=True, cast=bool)
+if not DEBUG and SECRET_KEY in (DEV_SECRET_KEY, "change-me", ""):
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured("Définissez une SECRET_KEY secrète dans .env avant de passer DEBUG=False.")
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
 
 INSTALLED_APPS = [
@@ -33,6 +38,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -109,6 +115,10 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -121,3 +131,26 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "accounts:login"
+
+# --------------------------------------------------------------- Production
+# Active automatiquement quand DEBUG=False (HTTPS obligatoire : la caméra du navigateur l'exige).
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = config("SECURE_HSTS_SECONDS", default=31536000, cast=int)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
+
+SESSION_COOKIE_AGE = config("SESSION_COOKIE_AGE", default=60 * 60 * 12, cast=int)  # 12 h
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {"std": {"format": "%(asctime)s %(levelname)s %(name)s: %(message)s"}},
+    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "std"}},
+    "root": {"handlers": ["console"], "level": config("LOG_LEVEL", default="INFO")},
+}

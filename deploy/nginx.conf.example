@@ -1,0 +1,30 @@
+# /etc/nginx/sites-available/ruche-rh  (exemple ; adapter le domaine et les chemins)
+server {
+    listen 80;
+    server_name rh.mon-domaine.bj;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name rh.mon-domaine.bj;
+
+    ssl_certificate     /etc/letsencrypt/live/rh.mon-domaine.bj/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/rh.mon-domaine.bj/privkey.pem;
+
+    client_max_body_size 10m;   # téléversement des CV et documents (limite applicative : 5 Mo)
+
+    # Logos et photos (publics). Le dossier private/ ne doit JAMAIS être exposé ici.
+    location /media/ {
+        alias /srv/ruche-rh/media/;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # La caméra et la géolocalisation sont réservées au site lui-même
+        add_header Permissions-Policy "camera=(self), microphone=()" always;
+    }
+}

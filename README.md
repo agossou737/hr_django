@@ -1,57 +1,56 @@
-# Ruche RH — Logiciel de gestion RH (Django)
+# Ruche RH — gestion RH & pointage par reconnaissance faciale (Django)
 
-Plateforme RH multi-entreprises pensée pour le marché béninois / zone OHADA, avec pointage par reconnaissance faciale (phase 2).
+Plateforme RH **multi-entreprises**, en français, pensée pour le **Bénin / zone OHADA** : pointage par
+reconnaissance faciale depuis le navigateur, congés, paie (CNSS, ITS, VPS), recrutement, évaluations et
+documents RH.
 
-## Phase 1 (livrée)
+## Fonctionnalités
 
-- Multi-entreprise (une entreprise = un « tenant », données strictement isolées)
-- Utilisateurs identifiés par e-mail, 4 rôles : Administrateur, Responsable RH, Manager, Employé
-- Départements, postes, fiches employés (matricule automatique `EMP0001`, CNSS, IFU…)
-- Contrats (CDI, CDD, stage, prestation, apprentissage)
-- Tableau de bord (effectifs, dernières embauches, contrats arrivant à échéance)
-- Interface web en français (Tailwind), administration Django
+| Module | Contenu |
+|---|---|
+| **Employés** | Fiches (matricule auto, CNSS, IFU), départements, postes, contrats, export CSV |
+| **Pointage facial** | Borne dans le navigateur (face-api.js, hors ligne), enrôlement avec consentement, arrivée/départ, retards, journal des scans, présences du jour, rapport mensuel |
+| **Congés** | Types, demandes, soldes, chevauchements, validation manager/RH, calendrier, intégration au pointage |
+| **Paie Bénin** | CNSS, ITS (barème progressif), VPS, congés non payés, primes/retenues, périodes validables, **bulletins PDF**, journal Excel/CSV, état CNSS |
+| **Recrutement** | Offres, candidatures par étapes, CV privé, embauche en un clic |
+| **Évaluations** | Grille de critères, brouillon → transmission → prise en compte par l'employé |
+| **Documents RH** | Stockage privé, alertes d'expiration |
+| **Paramètres** | Horaires, jours fériés du Bénin générés, utilisateurs et rôles |
 
-## Interface
+Rôles : Administrateur, Responsable RH, Manager, Employé, Borne de pointage. Les données de chaque
+entreprise sont strictement cloisonnées.
 
-Basée sur le template **Lineone** (Tailwind + Alpine.js) dans `static/`. Le nom du produit s'affiche partout via
-`APP_NAME` (variable `.env` ou `config/settings.py`). Le CSS du template étant un build purgé, les classes
-manquantes sont ajoutées dans `static/css/custom.css`.
-
-> Lineone est un template commercial : une licence adaptée est nécessaire pour une revente à des clients.
-
-## Feuille de route
-
-| Phase | Contenu |
-|-------|---------|
-| 2 | Pointage facial par la caméra du navigateur, présences, journal des tentatives |
-| 3 | Congés et absences (workflow de validation) |
-| 4 | Paie Bénin (CNSS, IRPP/ITS, bulletins PDF) |
-| 5 | Recrutement, évaluations, documents RH, exports |
-
-## Installation
-
+## Démarrage rapide
 ```bash
-python -m venv .venv
-source .venv/bin/activate        # Windows : .venv\Scripts\activate
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env             # puis ajuster
+cp .env.example .env
 python manage.py migrate
-python manage.py createsuperuser # compte plateforme (sans entreprise)
-python manage.py seed_demo       # optionnel : rh@demo.bj / demo12345
-python manage.py runserver
+python manage.py seed_demo      # rh@demo.bj / borne@demo.bj — mot de passe demo12345
+python manage.py runserver      # http://localhost:8000
 ```
+Nouveau client : `python manage.py create_company --name "Client SARL" --admin-email rh@client.bj`
 
-Pour PostgreSQL, renseigner `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` dans `.env`
-(sinon SQLite est utilisé).
+## Documentation (`docs/`)
+1. [Installation](docs/01-installation.md)
+2. [Déploiement en production](docs/02-deploiement.md) (Docker, nginx, HTTPS, sauvegardes)
+3. [Guide administrateur / mise en service d'un client](docs/03-guide-administrateur.md)
+4. [Guide utilisateur](docs/04-guide-utilisateur.md)
+5. [Pointage facial : fonctionnement, limites, données personnelles](docs/05-pointage-facial.md)
+6. [Paie Bénin : paramètres, calcul, périmètre](docs/06-paie-benin.md)
+7. [Architecture technique](docs/07-architecture.md)
+8. [Proposer le produit à des entreprises](docs/08-commercialisation.md)
 
-## Mise en route d'un client
-
-1. Dans `/admin/`, créer l'**Entreprise**.
-2. Créer un **Utilisateur** rattaché à cette entreprise avec le rôle *Responsable RH*.
-3. Ce compte se connecte sur `/compte/connexion/` et gère départements, postes, employés et contrats.
+## Points d'attention
+- **HTTPS obligatoire** en production (la caméra du navigateur l'exige hors `localhost`).
+- **Paie** : faire valider les paramètres par l'expert-comptable du client avant usage réel.
+- **Biométrie** : consentement et obligations légales à vérifier avec un juriste ; pas de détection du « vivant ».
 
 ## Tests
-
 ```bash
-python manage.py test
+python manage.py test     # 124 tests
 ```
+
+## Licences tierces
+Template d'interface Lineone (licence de son éditeur), face-api.js / @vladmandic/face-api (MIT,
+`static/vendor/face-api/LICENSE`).

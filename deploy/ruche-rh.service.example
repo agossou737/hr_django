@@ -1,0 +1,14 @@
+# /etc/systemd/system/ruche-rh.service  (déploiement sans Docker)
+[Unit]
+Description=Ruche RH (gunicorn)
+After=network.target
+
+[Service]
+User=ruche
+WorkingDirectory=/srv/ruche-rh
+EnvironmentFile=/srv/ruche-rh/.env
+ExecStart=/srv/ruche-rh/.venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:8000 --workers 3 --timeout 60
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

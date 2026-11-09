@@ -81,7 +81,7 @@
           <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ c.get_contract_type_display }}</td>
           <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ c.start_date|date:"d/m/Y" }}</td>
           <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ c.end_date|date:"d/m/Y"|default:"—" }}</td>
-          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ c.base_salary|floatformat:0 }} FCFA</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ c.base_salary|floatformat:"0g" }} FCFA</td>
           <td class="whitespace-nowrap px-4 py-3 sm:px-5">{% if c.is_current %}<span class="text-success">En cours</span>{% else %}Terminé{% endif %}</td>
           <td class="whitespace-nowrap px-4 py-3 sm:px-5 text-right">
             <a class="text-primary hover:underline dark:text-accent-light" href="{% url 'employees:contract_update' employee.pk c.pk %}">Modifier</a>
