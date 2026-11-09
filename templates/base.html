@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}JEV{% endblock %} · Gestion RH</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-800">
+{% if user.is_authenticated %}
+<div class="flex min-h-screen">
+  <aside class="hidden w-64 shrink-0 bg-slate-900 text-slate-200 md:block">
+    <div class="px-6 py-5 text-xl font-bold text-white">JEV <span class="text-indigo-400">RH</span></div>
+    <nav class="space-y-1 px-3 text-sm">
+      <a href="{% url 'dashboard' %}" class="block rounded-lg px-3 py-2 hover:bg-slate-800">Tableau de bord</a>
+      {% if user.company_id and user.can_manage_hr %}
+      <a href="{% url 'employees:list' %}" class="block rounded-lg px-3 py-2 hover:bg-slate-800">Employés</a>
+      <a href="{% url 'employees:department_list' %}" class="block rounded-lg px-3 py-2 hover:bg-slate-800">Départements</a>
+      <a href="{% url 'employees:position_list' %}" class="block rounded-lg px-3 py-2 hover:bg-slate-800">Postes</a>
+      {% endif %}
+      {% if user.is_staff %}
+      <a href="{% url 'admin:index' %}" class="block rounded-lg px-3 py-2 hover:bg-slate-800">Administration</a>
+      {% endif %}
+    </nav>
+  </aside>
+  <div class="flex-1">
+    <header class="flex items-center justify-between border-b bg-white px-6 py-3">
+      <div class="text-sm font-medium text-slate-600">{{ user.company|default:"Plateforme JEV" }}</div>
+      <div class="flex items-center gap-4 text-sm">
+        <span>{{ user }} · <span class="text-slate-500">{{ user.get_role_display }}</span></span>
+        <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
+          <button class="rounded-lg border px-3 py-1.5 hover:bg-slate-50">Déconnexion</button>
+        </form>
+      </div>
+    </header>
+    <main class="p-6">
+      {% for message in messages %}
+      <div class="mb-4 rounded-lg px-4 py-3 text-sm {% if message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-emerald-100 text-emerald-800{% endif %}">{{ message }}</div>
+      {% endfor %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% else %}
+{% block anonymous %}{% endblock %}
+{% endif %}
+</body>
+</html>

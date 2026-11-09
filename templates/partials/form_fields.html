@@ -1,0 +1,13 @@
+{% if form.non_field_errors %}
+<div class="rounded-lg bg-red-100 px-3 py-2 text-sm text-red-800">{{ form.non_field_errors }}</div>
+{% endif %}
+{% for field in form %}
+<div>
+  <label class="mb-1 block text-sm font-medium" for="{{ field.id_for_label }}">
+    {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
+  </label>
+  {{ field }}
+  {% if field.help_text %}<p class="mt-1 text-xs text-slate-500">{{ field.help_text }}</p>{% endif %}
+  {% for error in field.errors %}<p class="mt-1 text-xs text-red-600">{{ error }}</p>{% endfor %}
+</div>
+{% endfor %}

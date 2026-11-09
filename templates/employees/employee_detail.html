@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{{ employee.full_name }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+  <a href="{% url 'employees:list' %}" class="text-sm text-slate-500 hover:underline">← Retour à la liste</a>
+  <div class="flex gap-2">
+    <a href="{% url 'employees:update' employee.pk %}" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">Modifier</a>
+    <a href="{% url 'employees:delete' employee.pk %}" class="rounded-lg border border-red-300 px-4 py-2 text-sm text-red-600 hover:bg-red-50">Supprimer</a>
+  </div>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="rounded-xl bg-white p-6 shadow-sm">
+    <div class="mb-4 flex items-center gap-4">
+      {% if employee.photo %}<img src="{{ employee.photo.url }}" alt="" class="h-20 w-20 rounded-full object-cover">
+      {% else %}<div class="flex h-20 w-20 items-center justify-center rounded-full bg-indigo-100 text-2xl font-bold text-indigo-600">{{ employee.first_name|slice:":1" }}{{ employee.last_name|slice:":1" }}</div>{% endif %}
+      <div>
+        <div class="text-lg font-bold">{{ employee.full_name }}</div>
+        <div class="text-sm text-slate-500">{{ employee.matricule }}</div>
+        <div class="mt-1 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs">{{ employee.get_status_display }}</div>
+      </div>
+    </div>
+    <dl class="space-y-2 text-sm">
+      <div class="flex justify-between"><dt class="text-slate-500">Poste</dt><dd>{{ employee.position|default:"—" }}</dd></div>
+      <div class="flex justify-between"><dt class="text-slate-500">Département</dt><dd>{{ employee.department|default:"—" }}</dd></div>
+      <div class="flex justify-between"><dt class="text-slate-500">Supérieur</dt><dd>{{ employee.manager|default:"—" }}</dd></div>
+      <div class="flex justify-between"><dt class="text-slate-500">Embauché le</dt><dd>{{ employee.hire_date|date:"d/m/Y" }}</dd></div>
+      {% if employee.exit_date %}<div class="flex justify-between"><dt class="text-slate-500">Sorti le</dt><dd>{{ employee.exit_date|date:"d/m/Y" }}</dd></div>{% endif %}
+    </dl>
+  </div>
+
+  <div class="rounded-xl bg-white p-6 shadow-sm lg:col-span-2">
+    <h2 class="mb-3 font-semibold">Informations personnelles</h2>
+    <dl class="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+      <div class="flex justify-between"><dt class="text-slate-500">Sexe</dt><dd>{{ employee.get_gender_display }}</dd></div>
+      <div class="flex justify-between"><dt class="text-slate-500">Naissance</dt><dd>{{ employee.birth_date|date:"d/m/Y"|default:"—" }} {{ employee.birth_place }}</dd></div>
+      <div class="flex justify-between"><dt class="text-slate-500">Nationalité</dt><dd>{{ employee.nationality }}</dd></div>
+      <div class="flex justify-between"><dt class="text-slate-500">Situation</dt><dd>{{ employee.get_marital_status_display|default:"—" }}</dd></div>
+      <div class="flex justify-between"><dt class="text-slate-500">Enfants à charge</dt><dd>{{ employee.dependents }}</dd></div>
+      <div class="flex justify-between"><dt class="text-slate-500">E-mail</dt><dd>{{ employee.email|default:"—" }}</dd></div>
+      <div class="flex justify-between"><dt class="text-slate-500">Téléphone</dt><dd>{{ employee.phone|default:"—" }}</dd></div>
+      <div class="flex justify-between"><dt class="text-slate-500">Adresse</dt><dd>{{ employee.address|default:"—" }}</dd></div>
+      <div class="flex justify-between"><dt class="text-slate-500">N° CNSS</dt><dd>{{ employee.cnss_number|default:"—" }}</dd></div>
+      <div class="flex justify-between"><dt class="text-slate-500">IFU</dt><dd>{{ employee.ifu|default:"—" }}</dd></div>
+      <div class="flex justify-between"><dt class="text-slate-500">Contact d'urgence</dt><dd>{{ employee.emergency_contact_name|default:"—" }} {{ employee.emergency_contact_phone }}</dd></div>
+    </dl>
+  </div>
+</div>
+
+<div class="mt-6 rounded-xl bg-white p-6 shadow-sm">
+  <div class="mb-3 flex items-center justify-between">
+    <h2 class="font-semibold">Contrats</h2>
+    <a href="{% url 'employees:contract_create' employee.pk %}" class="rounded-lg border px-3 py-1.5 text-sm hover:bg-slate-50">+ Ajouter un contrat</a>
+  </div>
+  <table class="w-full text-left text-sm">
+    <thead class="text-xs uppercase text-slate-500"><tr><th class="py-2">Type</th><th>Début</th><th>Fin</th><th>Salaire de base</th><th>Statut</th><th></th></tr></thead>
+    <tbody class="divide-y">
+      {% for c in employee.contracts.all %}
+      <tr>
+        <td class="py-2">{{ c.get_contract_type_display }}</td>
+        <td>{{ c.start_date|date:"d/m/Y" }}</td>
+        <td>{{ c.end_date|date:"d/m/Y"|default:"—" }}</td>
+        <td>{{ c.base_salary|floatformat:0 }} FCFA</td>
+        <td>{% if c.is_current %}<span class="text-emerald-600">En cours</span>{% else %}Terminé{% endif %}</td>
+        <td class="text-right">
+          <a class="text-indigo-600 hover:underline" href="{% url 'employees:contract_update' employee.pk c.pk %}">Modifier</a> ·
+          <a class="text-red-600 hover:underline" href="{% url 'employees:contract_delete' employee.pk c.pk %}">Supprimer</a>
+        </td>
+      </tr>
+      {% empty %}<tr><td colspan="6" class="py-4 text-center text-slate-500">Aucun contrat enregistré.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Employés{% endblock %}
+{% block content %}
+<div class="mb-4 flex items-center justify-between">
+  <h1 class="text-2xl font-bold">Employés</h1>
+  <a href="{% url 'employees:create' %}" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">+ Nouvel employé</a>
+</div>
+
+<form method="get" class="mb-4 flex flex-wrap gap-3 rounded-xl bg-white p-4 shadow-sm">
+  <input type="search" name="q" value="{{ q }}" placeholder="Nom, matricule, e-mail…"
+         class="min-w-[14rem] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm">
+  <select name="department" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+    <option value="">Tous les départements</option>
+    {% for d in departments %}<option value="{{ d.pk }}" {% if selected_department == d.pk|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+  </select>
+  <select name="status" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+    <option value="">Tous les statuts</option>
+    {% for value, label in statuses %}<option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select>
+  <button class="rounded-lg bg-slate-800 px-4 py-2 text-sm text-white">Filtrer</button>
+</form>
+
+<div class="overflow-hidden rounded-xl bg-white shadow-sm">
+  <table class="w-full text-left text-sm">
+    <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+      <tr><th class="px-4 py-3">Matricule</th><th class="px-4 py-3">Nom</th><th class="px-4 py-3">Département</th><th class="px-4 py-3">Poste</th><th class="px-4 py-3">Embauche</th><th class="px-4 py-3">Statut</th></tr>
+    </thead>
+    <tbody class="divide-y">
+      {% for e in employees %}
+      <tr class="hover:bg-slate-50">
+        <td class="px-4 py-3 font-mono text-xs">{{ e.matricule }}</td>
+        <td class="px-4 py-3"><a class="font-medium text-indigo-600 hover:underline" href="{% url 'employees:detail' e.pk %}">{{ e.last_name }} {{ e.first_name }}</a></td>
+        <td class="px-4 py-3">{{ e.department|default:"—" }}</td>
+        <td class="px-4 py-3">{{ e.position|default:"—" }}</td>
+        <td class="px-4 py-3">{{ e.hire_date|date:"d/m/Y" }}</td>
+        <td class="px-4 py-3">{{ e.get_status_display }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">Aucun employé trouvé.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if is_paginated %}
+<div class="mt-4 flex items-center justify-between text-sm">
+  <span>Page {{ page_obj.number }} / {{ paginator.num_pages }}</span>
+  <div class="flex gap-2">
+    {% if page_obj.has_previous %}<a class="rounded-lg border bg-white px-3 py-1.5" href="?{{ querystring }}&page={{ page_obj.previous_page_number }}">Précédent</a>{% endif %}
+    {% if page_obj.has_next %}<a class="rounded-lg border bg-white px-3 py-1.5" href="?{{ querystring }}&page={{ page_obj.next_page_number }}">Suivant</a>{% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

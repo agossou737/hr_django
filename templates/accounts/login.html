@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Connexion{% endblock %}
+{% block anonymous %}
+<div class="flex min-h-screen items-center justify-center px-4">
+  <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow">
+    <h1 class="mb-1 text-2xl font-bold">JEV <span class="text-indigo-600">RH</span></h1>
+    <p class="mb-6 text-sm text-slate-500">Connectez-vous à votre espace de gestion des ressources humaines.</p>
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+      <div class="rounded-lg bg-red-100 px-3 py-2 text-sm text-red-800">Adresse e-mail ou mot de passe incorrect.</div>
+      {% endif %}
+      <div>
+        <label class="mb-1 block text-sm font-medium" for="id_username">Adresse e-mail</label>
+        <input type="email" name="username" id="id_username" required autofocus autocomplete="email"
+               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+      </div>
+      <div>
+        <label class="mb-1 block text-sm font-medium" for="id_password">Mot de passe</label>
+        <input type="password" name="password" id="id_password" required autocomplete="current-password"
+               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+      </div>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button class="w-full rounded-lg bg-indigo-600 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Se connecter</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

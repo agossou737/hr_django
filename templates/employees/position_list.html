@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Postes{% endblock %}
+{% block content %}
+<div class="mb-4 flex items-center justify-between">
+  <h1 class="text-2xl font-bold">Postes</h1>
+  <a href="{% url 'employees:position_create' %}" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">+ Nouveau poste</a>
+</div>
+<div class="overflow-hidden rounded-xl bg-white shadow-sm">
+  <table class="w-full text-left text-sm">
+    <thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="px-4 py-3">Intitulé</th><th class="px-4 py-3">Département</th><th class="px-4 py-3">Salaire indicatif</th><th></th></tr></thead>
+    <tbody class="divide-y">
+      {% for p in positions %}
+      <tr>
+        <td class="px-4 py-3 font-medium">{{ p.title }}</td>
+        <td class="px-4 py-3">{{ p.department|default:"—" }}</td>
+        <td class="px-4 py-3">{{ p.base_salary|floatformat:0 }} FCFA</td>
+        <td class="px-4 py-3 text-right">
+          <a class="text-indigo-600 hover:underline" href="{% url 'employees:position_update' p.pk %}">Modifier</a> ·
+          <a class="text-red-600 hover:underline" href="{% url 'employees:position_delete' p.pk %}">Supprimer</a>
+        </td>
+      </tr>
+      {% empty %}<tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">Aucun poste.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

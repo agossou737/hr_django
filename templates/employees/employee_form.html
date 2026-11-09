@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Modifier {{ object.full_name }}{% else %}Nouvel employé{% endif %}{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-4xl rounded-xl bg-white p-6 shadow-sm">
+  <h1 class="mb-6 text-xl font-bold">{% if object %}Modifier la fiche de {{ object.full_name }}{% else %}Nouvel employé{% endif %}</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="mb-4 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-800">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="grid gap-4 md:grid-cols-2">
+      {% for field in form %}
+      <div class="{% if field.name == 'address' %}md:col-span-2{% endif %}">
+        <label class="mb-1 block text-sm font-medium" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}</label>
+        {{ field }}
+        {% if field.help_text %}<p class="mt-1 text-xs text-slate-500">{{ field.help_text }}</p>{% endif %}
+        {% for error in field.errors %}<p class="mt-1 text-xs text-red-600">{{ error }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="mt-6 flex justify-end gap-3">
+      <a href="{% if object %}{% url 'employees:detail' object.pk %}{% else %}{% url 'employees:list' %}{% endif %}" class="rounded-lg border px-4 py-2 text-sm hover:bg-slate-50">Annuler</a>
+      <button class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Enregistrer</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

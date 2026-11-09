@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord{% endblock %}
+{% block content %}
+<h1 class="mb-6 text-2xl font-bold">Tableau de bord</h1>
+
+{% if not company %}
+<div class="rounded-xl bg-amber-50 p-6 text-sm text-amber-900">
+  Ce compte n'est rattaché à aucune entreprise. Créez une entreprise et rattachez-y des utilisateurs depuis
+  {% if user.is_staff %}<a class="underline" href="{% url 'admin:index' %}">l'administration</a>{% else %}l'administration{% endif %}.
+</div>
+{% else %}
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="rounded-xl bg-white p-5 shadow-sm"><div class="text-sm text-slate-500">Employés</div><div class="mt-1 text-3xl font-bold">{{ total_employees }}</div></div>
+  <div class="rounded-xl bg-white p-5 shadow-sm"><div class="text-sm text-slate-500">Actifs</div><div class="mt-1 text-3xl font-bold text-emerald-600">{{ active_employees }}</div></div>
+  <div class="rounded-xl bg-white p-5 shadow-sm"><div class="text-sm text-slate-500">En congé</div><div class="mt-1 text-3xl font-bold text-amber-600">{{ on_leave_employees }}</div></div>
+  <div class="rounded-xl bg-white p-5 shadow-sm"><div class="text-sm text-slate-500">Départements</div><div class="mt-1 text-3xl font-bold text-indigo-600">{{ departments_count }}</div></div>
+</div>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-3">
+  <div class="rounded-xl bg-white p-5 shadow-sm">
+    <h2 class="mb-3 font-semibold">Effectif par département</h2>
+    <ul class="space-y-2 text-sm">
+      {% for row in by_department %}
+      <li class="flex justify-between"><span>{{ row.department__name|default:"Sans département" }}</span><span class="font-semibold">{{ row.total }}</span></li>
+      {% empty %}<li class="text-slate-500">Aucune donnée.</li>{% endfor %}
+    </ul>
+  </div>
+  <div class="rounded-xl bg-white p-5 shadow-sm">
+    <h2 class="mb-3 font-semibold">Dernières embauches</h2>
+    <ul class="space-y-2 text-sm">
+      {% for e in recent_hires %}
+      <li class="flex justify-between"><a class="text-indigo-600 hover:underline" href="{% url 'employees:detail' e.pk %}">{{ e.full_name }}</a><span class="text-slate-500">{{ e.hire_date|date:"d/m/Y" }}</span></li>
+      {% empty %}<li class="text-slate-500">Aucun employé.</li>{% endfor %}
+    </ul>
+  </div>
+  <div class="rounded-xl bg-white p-5 shadow-sm">
+    <h2 class="mb-3 font-semibold">Contrats arrivant à échéance (60 j)</h2>
+    <ul class="space-y-2 text-sm">
+      {% for c in expiring_contracts %}
+      <li class="flex justify-between"><a class="text-indigo-600 hover:underline" href="{% url 'employees:detail' c.employee.pk %}">{{ c.employee.full_name }}</a><span class="text-red-600">{{ c.end_date|date:"d/m/Y" }}</span></li>
+      {% empty %}<li class="text-slate-500">Aucune échéance proche.</li>{% endfor %}
+    </ul>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
