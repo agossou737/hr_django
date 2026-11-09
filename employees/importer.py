@@ -292,6 +292,7 @@ def apply(company, analysis):
     fields = ["first_name", "last_name", "gender", "birth_place", "nationality", "marital_status", "dependents",
               "email", "phone", "address", "emergency_contact_name", "emergency_contact_phone", "cnss_number", "ifu", "status"]
     created = updated = 0
+    new_ids = []
     for kind in ("create", "update"):
         for item in analysis[kind]:
             d = item["data"]
@@ -304,6 +305,7 @@ def apply(company, analysis):
                 emp = Employee(company=company, matricule=d["matricule"], department=department, position=pos, **values)
                 emp.save()
                 created += 1
+                new_ids.append(emp.pk)
             else:
                 emp = Employee.objects.get(pk=item["employee_id"], company=company)
                 for k, v in values.items():
@@ -317,4 +319,4 @@ def apply(company, analysis):
             if d["base_salary"] and kind == "create":
                 Contract.objects.create(company=company, employee=emp, contract_type=d["contract_type"],
                                         start_date=values["hire_date"], base_salary=Decimal(d["base_salary"]))
-    return created, updated
+    return created, updated, new_ids

@@ -95,6 +95,23 @@ class ImportFlowTests(TestCase):
         self.assertEqual(Employee.objects.get(last_name="ZINSOU").matricule, "X-77")
         self.assertEqual(Contract.objects.count(), 1)
 
+    def test_import_can_create_accounts(self):
+        f = xlsx([row(last_name="DOSSOU", first_name="Jean", gender="M", hire_date="01/02/2026", email="jean@x.bj"),
+                  row(last_name="ZINSOU", first_name="Awa", gender="F", hire_date="01/02/2026")])
+        self.upload(f)
+        r = self.client.post(reverse("employees:import_confirm"), {"create_accounts": "1"})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.context["rows"]), 1)           # Awa n'a pas d'e-mail
+        self.assertEqual(len(r.context["skipped"]), 1)
+        jean = Employee.objects.get(last_name="DOSSOU")
+        self.assertEqual((jean.user.email, jean.user.must_change_password), ("jean@x.bj", True))
+        self.assertIsNone(Employee.objects.get(last_name="ZINSOU").user)
+
+    def test_import_without_option_creates_no_account(self):
+        self.upload(xlsx([row(last_name="A", first_name="B", gender="M", hire_date="01/02/2026", email="a@x.bj")]))
+        self.client.post(reverse("employees:import_confirm"))
+        self.assertIsNone(Employee.objects.get().user)
+
     def test_duplicates_skip_then_update(self):
         Employee.objects.create(company=self.c1, first_name="Old", last_name="NAME", gender="M",
                                 hire_date=datetime.date(2025, 1, 1), email="dup@x.bj")

@@ -1,14 +1,14 @@
 from django.contrib import messages
 from django.db.models import Q
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.http import Http404
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView, View
+from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, TemplateView, UpdateView, View
 
 from companies.exports import FORMATS, export_table
 from accounts.mixins import CompanyFormMixin, CompanyQuerysetMixin, HRRequiredMixin
 
-from .forms import ContractForm, DepartmentForm, EmployeeForm, PositionForm
+from .forms import AccessForm, ContractForm, DepartmentForm, EmployeeForm, PositionForm
 from .models import Contract, Department, Employee, Position
 
 
@@ -75,6 +75,41 @@ class EmployeeDetailView(HRRequiredMixin, CompanyQuerysetMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         ctx["face_samples"] = self.object.face_templates.count()
         return ctx
+
+
+class EmployeeAccessView(HRRequiredMixin, FormView):
+    """Création de l'accès de connexion d'un employé (mot de passe temporaire)."""
+
+    form_class = AccessForm
+    template_name = "form_page.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.company_id and request.user.can_manage_hr:
+            self.employee = get_object_or_404(Employee, pk=kwargs["pk"], company=request.user.company)
+            if self.employee.user_id:
+                messages.info(request, "Cet employé a déjà un accès.")
+                return redirect("employees:detail", pk=self.employee.pk)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_initial(self):
+        return {"email": self.employee.email}
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx.update(title=f"Créer l'accès de {self.employee.full_name}",
+                   cancel_url=reverse("employees:detail", args=[self.employee.pk]))
+        return ctx
+
+    def form_valid(self, form):
+        from accounts import access
+
+        try:
+            user, password = access.create_access(self.employee, form.cleaned_data["email"], form.cleaned_data["role"])
+        except access.AccessError as exc:
+            form.add_error(None, str(exc))
+            return self.form_invalid(form)
+        return render(self.request, "employees/access_created.html",
+                      {"rows": [(self.employee, user.email, password)], "employee": self.employee})
 
 
 class EmployeeCreateView(HRRequiredMixin, CompanyFormMixin, CreateView):
@@ -355,10 +390,39 @@ class ImportConfirmView(HRRequiredMixin, View):
         if not stored or stored.get("company") != request.user.company_id:
             messages.error(request, "Aucun import en attente.")
             return redirect("employees:import")
-        created, updated = importer.apply(request.user.company, stored["analysis"])
+        created, updated, new_ids = importer.apply(request.user.company, stored["analysis"])
         request.session.pop(SESSION_KEY, None)
         messages.success(request, f"Import terminé : {created} employé(s) créé(s), {updated} mis à jour.")
+        if request.POST.get("create_accounts") and new_ids:
+            from accounts import access
+
+            rows, skipped = [], []
+            for emp in Employee.objects.filter(pk__in=new_ids, company=request.user.company):
+                try:
+                    user, pwd = access.create_access(emp)
+                    rows.append((emp, user.email, pwd))
+                except access.AccessError as exc:
+                    skipped.append((emp, str(exc)))
+            return render(request, "employees/access_created.html", {"rows": rows, "skipped": skipped})
         return redirect("employees:list")
+
+
+class BulkAccessView(HRRequiredMixin, View):
+    """Crée les accès de tous les employés actifs qui n'en ont pas encore (et ont une adresse e-mail)."""
+
+    http_method_names = ["post"]
+
+    def post(self, request):
+        from accounts import access
+
+        rows, skipped = [], []
+        for emp in Employee.objects.filter(company=request.user.company, user__isnull=True).exclude(status="left"):
+            try:
+                user, pwd = access.create_access(emp)
+                rows.append((emp, user.email, pwd))
+            except access.AccessError as exc:
+                skipped.append((emp, str(exc)))
+        return render(request, "employees/access_created.html", {"rows": rows, "skipped": skipped})
 
 
 class ImportErrorsView(HRRequiredMixin, View):

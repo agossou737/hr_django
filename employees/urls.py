@@ -5,6 +5,8 @@ from . import views
 app_name = "employees"
 
 urlpatterns = [
+    path("acces/creer-tous/", views.BulkAccessView.as_view(), name="access_bulk"),
+    path("<int:pk>/acces/", views.EmployeeAccessView.as_view(), name="access"),
     path("import/", views.ImportView.as_view(), name="import"),
     path("import/modele/", views.ImportTemplateView.as_view(), name="import_template"),
     path("import/apercu/", views.ImportPreviewView.as_view(), name="import_preview"),

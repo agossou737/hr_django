@@ -5,6 +5,7 @@
 <div class="mb-4 flex items-center justify-between">
   <h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Employés</h2>
   <div class="flex gap-2">{% export_buttons %}
+  <form method="post" action="{% url 'employees:access_bulk' %}" class="inline" onsubmit="return confirm('Créer l\'accès de tous les employés qui n\'en ont pas (avec e-mail) ?');">{% csrf_token %}<button class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500">Créer les accès</button></form>
   <a href="{% url 'employees:import' %}" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500">Importer</a>
   <a href="{% url 'employees:create' %}" class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">+ Nouvel employé</a></div>
 </div>

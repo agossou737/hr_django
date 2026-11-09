@@ -164,3 +164,12 @@ class ContractForm(CompanyModelForm):
         if cleaned.get("contract_type") == Contract.ContractType.CDD and not end:
             self.add_error("end_date", "Un CDD doit avoir une date de fin.")
         return cleaned
+
+
+class AccessForm(StyledFormMixin, forms.Form):
+    email = forms.EmailField(label="E-mail de connexion")
+    role = forms.ChoiceField(label="Rôle", choices=[("employee", "Employé"), ("manager", "Manager")], initial="employee")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._style_fields()

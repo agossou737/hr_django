@@ -1,13 +1,17 @@
 from datetime import date, timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages as dj_messages
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import LoginView, LogoutView
 from django.db.models import Count
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
-from django.views.generic import TemplateView
+from django.urls import reverse_lazy
+from django.views.generic import FormView, TemplateView
 
 from employees.models import Contract, Department, Employee
 
@@ -25,6 +29,35 @@ class UserLoginView(LoginView):
 
 class UserLogoutView(LogoutView):
     pass
+
+
+class PasswordChangeView(LoginRequiredMixin, FormView):
+    """Changement de son propre mot de passe (obligatoire après un mot de passe temporaire)."""
+
+    template_name = "accounts/password_change.html"
+    success_url = reverse_lazy("dashboard")
+
+    def get_form(self, form_class=None):
+        form = PasswordChangeForm(self.request.user, **self.get_form_kwargs())
+        for field in form.fields.values():
+            field.widget.attrs["class"] = ("form-input w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 "
+                                           "placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary "
+                                           "dark:border-navy-450 dark:hover:border-navy-400 dark:focus:border-accent")
+        return form
+
+    def form_valid(self, form):
+        user = form.save()
+        if user.must_change_password:
+            user.must_change_password = False
+            user.save(update_fields=["must_change_password"])
+        update_session_auth_hash(self.request, user)
+        dj_messages.success(self.request, "Mot de passe modifié.")
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["forced"] = self.request.user.must_change_password
+        return ctx
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):

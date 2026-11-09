@@ -93,3 +93,14 @@ Catalogue (organisme, dates, lieu, coût), inscription groupée d'employés (not
 Réservé aux RH (les managers n'y ont pas accès) : avertissement verbal/écrit, blâme, mise à pied, autre mesure,
 rattachable à une demande d'explication. L'employé est notifié, consulte le **PDF de notification** et
 **confirme sa prise de connaissance** (horodatée). Export de la liste.
+
+# Accès de connexion des employés
+
+Créer une fiche ou importer des employés **ne crée pas** de compte : l'accès se crée explicitement.
+* **Un employé** : fiche employé → « Accès à l'application » → *Créer l'accès* (e-mail + rôle Employé/Manager).
+* **Tous d'un coup** : liste des employés → *Créer les accès* (ceux qui ont une adresse e-mail et pas encore de compte).
+* **À l'import** : case « Créer aussi les comptes de connexion » avant de confirmer.
+* Un **mot de passe temporaire** est affiché une seule fois (imprimable) et envoyé par e-mail ; l'employé doit en choisir un
+  nouveau à sa première connexion. Il peut ensuite le changer à tout moment (menu du profil → *Changer mon mot de passe*).
+* *Réinitialiser le mot de passe* est disponible sur la fiche pour un compte existant.
+* La connexion ignore la casse de l'adresse e-mail (`Jean@X.bj` = `jean@x.bj`).

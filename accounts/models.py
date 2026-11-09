@@ -14,6 +14,10 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    def get_by_natural_key(self, email):
+        """Connexion insensible à la casse de l'adresse e-mail."""
+        return self.get(email__iexact=email.strip())
+
     def create_user(self, email, password=None, **extra):
         extra.setdefault("is_staff", False)
         extra.setdefault("is_superuser", False)
@@ -47,6 +51,7 @@ class User(AbstractUser):
         related_name="users",
     )
     role = models.CharField("Rôle", max_length=20, choices=Role.choices, default=Role.EMPLOYEE)
+    must_change_password = models.BooleanField("Doit changer son mot de passe", default=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
