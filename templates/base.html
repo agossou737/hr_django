@@ -1,48 +1,147 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}JEV{% endblock %} · Gestion RH</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-slate-100 text-slate-800">
-{% if user.is_authenticated %}
-<div class="flex min-h-screen">
-  <aside class="hidden w-64 shrink-0 bg-slate-900 text-slate-200 md:block">
-    <div class="px-6 py-5 text-xl font-bold text-white">JEV <span class="text-indigo-400">RH</span></div>
-    <nav class="space-y-1 px-3 text-sm">
-      <a href="{% url 'dashboard' %}" class="block rounded-lg px-3 py-2 hover:bg-slate-800">Tableau de bord</a>
-      {% if user.company_id and user.can_manage_hr %}
-      <a href="{% url 'employees:list' %}" class="block rounded-lg px-3 py-2 hover:bg-slate-800">Employés</a>
-      <a href="{% url 'employees:department_list' %}" class="block rounded-lg px-3 py-2 hover:bg-slate-800">Départements</a>
-      <a href="{% url 'employees:position_list' %}" class="block rounded-lg px-3 py-2 hover:bg-slate-800">Postes</a>
-      {% endif %}
-      {% if user.is_staff %}
-      <a href="{% url 'admin:index' %}" class="block rounded-lg px-3 py-2 hover:bg-slate-800">Administration</a>
-      {% endif %}
-    </nav>
-  </aside>
-  <div class="flex-1">
-    <header class="flex items-center justify-between border-b bg-white px-6 py-3">
-      <div class="text-sm font-medium text-slate-600">{{ user.company|default:"Plateforme JEV" }}</div>
-      <div class="flex items-center gap-4 text-sm">
-        <span>{{ user }} · <span class="text-slate-500">{{ user.get_role_display }}</span></span>
-        <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
-          <button class="rounded-lg border px-3 py-1.5 hover:bg-slate-50">Déconnexion</button>
-        </form>
+{% extends "layout_root.html" %}
+{% load static %}
+{% block body %}
+<!-- Menu latéral -->
+<div class="sidebar print:hidden">
+  <div class="main-sidebar">
+    <div class="flex h-full w-full flex-col items-center border-r border-slate-150 bg-white dark:border-navy-700 dark:bg-navy-800">
+      <div class="flex pt-4">
+        <a href="{% url 'dashboard' %}" title="{{ APP_NAME }}">
+          <img class="size-11 transition-transform duration-500 ease-in-out hover:rotate-[360deg]" src="{% static 'images/app-logo.svg' %}" alt="{{ APP_NAME }}" />
+        </a>
       </div>
-    </header>
-    <main class="p-6">
-      {% for message in messages %}
-      <div class="mb-4 rounded-lg px-4 py-3 text-sm {% if message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-emerald-100 text-emerald-800{% endif %}">{{ message }}</div>
-      {% endfor %}
-      {% block content %}{% endblock %}
-    </main>
+
+      <div class="is-scrollbar-hidden flex grow flex-col space-y-4 overflow-y-auto pt-6">
+        {% for item in nav_items %}
+        <a href="{{ item.url }}"
+           class="flex size-11 items-center justify-center rounded-lg outline-hidden transition-colors duration-200 {% if item.key == nav_section %}bg-primary/10 text-primary hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-navy-600 dark:text-accent-light dark:hover:bg-navy-450 dark:focus:bg-navy-450 dark:active:bg-navy-450/90{% else %}text-slate-500 hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:text-navy-200 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25{% endif %}"
+           x-tooltip.placement.right="'{{ item.label }}'">
+          <svg class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="{{ item.icon }}" />
+          </svg>
+        </a>
+        {% endfor %}
+      </div>
+
+      <div class="flex flex-col items-center space-y-3 py-3">
+        {% if user.is_staff %}
+        <a href="{% url 'admin:index' %}" class="flex size-11 items-center justify-center rounded-lg text-slate-500 outline-hidden transition-colors duration-200 hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:text-navy-200 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25"
+           x-tooltip.placement.right="'Administration'">
+          <svg class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </a>
+        {% endif %}
+
+        <!-- Profil -->
+        <div x-data="usePopper({placement:'right-end',offset:12})" @click.outside="isShowPopper && (isShowPopper = false)" class="flex">
+          <button @click="isShowPopper = !isShowPopper" x-ref="popperRef" class="avatar size-12 cursor-pointer">
+            <div class="is-initial rounded-full bg-primary text-sm uppercase text-white dark:bg-accent">{{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}{% if not user.first_name and not user.last_name %}{{ user.email|slice:":1" }}{% endif %}</div>
+            <span class="absolute right-0 size-3.5 rounded-full border-2 border-white bg-success dark:border-navy-700"></span>
+          </button>
+          <div :class="isShowPopper && 'show'" class="popper-root fixed" x-ref="popperRoot">
+            <div class="popper-box w-64 rounded-lg border border-slate-150 bg-white shadow-soft dark:border-navy-600 dark:bg-navy-700">
+              <div class="flex items-center space-x-4 rounded-t-lg bg-slate-100 px-4 py-5 dark:bg-navy-800">
+                <div class="avatar size-14">
+                  <div class="is-initial rounded-full bg-primary text-lg uppercase text-white dark:bg-accent">{{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}{% if not user.first_name and not user.last_name %}{{ user.email|slice:":1" }}{% endif %}</div>
+                </div>
+                <div class="min-w-0">
+                  <p class="truncate text-base font-medium text-slate-700 dark:text-navy-100">{{ user }}</p>
+                  <p class="text-xs text-slate-400 dark:text-navy-300">{{ user.get_role_display }}</p>
+                </div>
+              </div>
+              <div class="flex flex-col pb-4 pt-2">
+                <form method="post" action="{% url 'accounts:logout' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="group flex w-full items-center space-x-3 px-4 py-2 tracking-wide outline-hidden transition-all hover:bg-slate-100 focus:bg-slate-100 dark:hover:bg-navy-600 dark:focus:bg-navy-600">
+                    <div class="flex size-8 items-center justify-center rounded-lg bg-error text-white">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                    </div>
+                    <h2 class="font-medium text-slate-700 transition-colors group-hover:text-primary dark:text-navy-100 dark:group-hover:text-accent-light">Déconnexion</h2>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panneau latéral -->
+  <div class="sidebar-panel">
+    <div class="flex h-full grow flex-col bg-white pl-[var(--main-sidebar-width)] dark:bg-navy-750">
+      <div class="flex h-18 w-full items-center justify-between pl-4 pr-1">
+        <p class="text-base font-semibold tracking-wider text-slate-800 dark:text-navy-100">{{ APP_NAME }}</p>
+        <button @click="$store.global.isSidebarExpanded = false" class="btn size-7 rounded-full p-0 text-primary hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:text-accent-light/80 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25 xl:hidden">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      </div>
+      <div class="h-[calc(100%-4.5rem)] overflow-x-hidden pb-6" x-init="$el._x_simplebar = new SimpleBar($el);">
+        {% if company %}<p class="px-4 pb-2 text-xs uppercase tracking-wide text-slate-400 dark:text-navy-300">{{ company }}</p>{% endif %}
+        <ul class="flex flex-1 flex-col px-4 font-inter">
+          {% for item in nav_items %}
+          <li>
+            <a href="{{ item.url }}" class="flex py-2 text-xs-plus tracking-wide outline-hidden transition-colors duration-300 ease-in-out {% if item.key == nav_section %}font-medium text-primary dark:text-accent-light{% else %}text-slate-600 hover:text-slate-900 dark:text-navy-200 dark:hover:text-navy-50{% endif %}">{{ item.label }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+        <div class="my-3 mx-4 h-px bg-slate-200 dark:bg-navy-500"></div>
+        <p class="px-4 text-xs text-slate-400 dark:text-navy-300">{{ APP_TAGLINE }}</p>
+      </div>
+    </div>
   </div>
 </div>
-{% else %}
-{% block anonymous %}{% endblock %}
-{% endif %}
-</body>
-</html>
+
+<!-- En-tête -->
+<nav class="header before:bg-white dark:before:bg-navy-750 print:hidden">
+  <div class="header-container relative flex w-full print:hidden">
+    <div class="flex w-full items-center justify-between">
+      <div class="size-7">
+        <button class="menu-toggle cursor-pointer ml-0.5 flex size-7 flex-col justify-center space-y-1.5 text-primary outline-hidden focus:outline-hidden dark:text-accent-light/80"
+                :class="$store.global.isSidebarExpanded && 'active'"
+                @click="$store.global.isSidebarExpanded = !$store.global.isSidebarExpanded">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+
+      <div class="-mr-1.5 flex items-center space-x-2">
+        <!-- Mode sombre -->
+        <button @click="$store.global.isDarkModeEnabled = !$store.global.isDarkModeEnabled"
+                class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25"
+                title="Mode sombre">
+          <svg x-show="$store.global.isDarkModeEnabled" class="size-6 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M11.75 3.412a.818.818 0 01-.07.917 6.332 6.332 0 00-1.4 3.971c0 3.564 2.98 6.494 6.706 6.494a6.86 6.86 0 002.856-.617.818.818 0 011.1 1.047C19.593 18.614 16.218 21 12.283 21 7.18 21 3 16.973 3 11.956c0-4.563 3.46-8.31 7.925-8.948a.818.818 0 01.826.404z" />
+          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" x-show="!$store.global.isDarkModeEnabled" class="size-6 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+          </svg>
+        </button>
+        <!-- Mode monochrome -->
+        <button @click="$store.global.isMonochromeModeEnabled = !$store.global.isMonochromeModeEnabled"
+                class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25"
+                title="Mode monochrome">
+          <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.5" /><path d="M12 3.5a8.5 8.5 0 010 17z" fill="#0ea5e9" /></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Contenu -->
+<main class="main-content w-full px-[var(--margin-x)] pb-8">
+  <div class="mt-4 sm:mt-5 lg:mt-6">
+    {% for message in messages %}
+    <div class="mb-4 flex items-center space-x-3 rounded-lg px-4 py-3 text-sm {% if message.tags == 'error' %}bg-error/10 text-error{% else %}bg-success/10 text-success{% endif %}">
+      <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </div>
+</main>
+{% endblock %}

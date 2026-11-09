@@ -1,28 +1,49 @@
-{% extends "base.html" %}
+{% extends "layout_root.html" %}
+{% load static %}
 {% block title %}Connexion{% endblock %}
-{% block anonymous %}
-<div class="flex min-h-screen items-center justify-center px-4">
-  <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow">
-    <h1 class="mb-1 text-2xl font-bold">JEV <span class="text-indigo-600">RH</span></h1>
-    <p class="mb-6 text-sm text-slate-500">Connectez-vous à votre espace de gestion des ressources humaines.</p>
-    <form method="post" class="space-y-4">
+{% block body %}
+<main class="grid w-full grow grid-cols-1 place-items-center">
+  <div class="w-full max-w-[26rem] p-4 sm:px-5">
+    <div class="text-center">
+      <img class="mx-auto size-16" src="{% static 'images/app-logo.svg' %}" alt="{{ APP_NAME }}" />
+      <div class="mt-4">
+        <h2 class="text-2xl font-semibold text-slate-600 dark:text-navy-100">{{ APP_NAME }}</h2>
+        <p class="text-slate-400 dark:text-navy-300">Connectez-vous pour continuer</p>
+      </div>
+    </div>
+    <form method="post" class="card mt-5 rounded-lg p-5 lg:p-7">
       {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}" />
       {% if form.non_field_errors %}
-      <div class="rounded-lg bg-red-100 px-3 py-2 text-sm text-red-800">Adresse e-mail ou mot de passe incorrect.</div>
+      <div class="mb-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">Adresse e-mail ou mot de passe incorrect.</div>
       {% endif %}
-      <div>
-        <label class="mb-1 block text-sm font-medium" for="id_username">Adresse e-mail</label>
-        <input type="email" name="username" id="id_username" required autofocus autocomplete="email"
-               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-      </div>
-      <div>
-        <label class="mb-1 block text-sm font-medium" for="id_password">Mot de passe</label>
-        <input type="password" name="password" id="id_password" required autocomplete="current-password"
-               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-      </div>
-      <input type="hidden" name="next" value="{{ next }}">
-      <button class="w-full rounded-lg bg-indigo-600 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Se connecter</button>
+      <label class="block">
+        <span>Adresse e-mail :</span>
+        <span class="relative mt-1.5 flex">
+          <input class="form-input peer w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 pl-9 placeholder:text-slate-400/70 hover:z-10 hover:border-slate-400 focus:z-10 focus:border-primary dark:border-navy-450 dark:hover:border-navy-400 dark:focus:border-accent"
+                 placeholder="vous@entreprise.bj" type="email" name="username" id="id_username" required autofocus autocomplete="email" />
+          <span class="pointer-events-none absolute flex h-full w-10 items-center justify-center text-slate-400 peer-focus:text-primary dark:text-navy-300 dark:peer-focus:text-accent">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </span>
+        </span>
+      </label>
+      <label class="mt-4 block">
+        <span>Mot de passe :</span>
+        <span class="relative mt-1.5 flex">
+          <input class="form-input peer w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 pl-9 placeholder:text-slate-400/70 hover:z-10 hover:border-slate-400 focus:z-10 focus:border-primary dark:border-navy-450 dark:hover:border-navy-400 dark:focus:border-accent"
+                 placeholder="Votre mot de passe" type="password" name="password" id="id_password" required autocomplete="current-password" />
+          <span class="pointer-events-none absolute flex h-full w-10 items-center justify-center text-slate-400 peer-focus:text-primary dark:text-navy-300 dark:peer-focus:text-accent">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </span>
+        </span>
+      </label>
+      <button class="btn mt-5 w-full bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">Se connecter</button>
     </form>
+    <p class="mt-8 text-center text-xs text-slate-400 dark:text-navy-300">{{ APP_TAGLINE }}</p>
   </div>
-</div>
+</main>
 {% endblock %}

@@ -2,25 +2,30 @@
 {% block title %}Postes{% endblock %}
 {% block content %}
 <div class="mb-4 flex items-center justify-between">
-  <h1 class="text-2xl font-bold">Postes</h1>
-  <a href="{% url 'employees:position_create' %}" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">+ Nouveau poste</a>
+  <h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Postes</h2>
+  <a href="{% url 'employees:position_create' %}" class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">+ Nouveau poste</a>
 </div>
-<div class="overflow-hidden rounded-xl bg-white shadow-sm">
-  <table class="w-full text-left text-sm">
-    <thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="px-4 py-3">Intitulé</th><th class="px-4 py-3">Département</th><th class="px-4 py-3">Salaire indicatif</th><th></th></tr></thead>
-    <tbody class="divide-y">
-      {% for p in positions %}
-      <tr>
-        <td class="px-4 py-3 font-medium">{{ p.title }}</td>
-        <td class="px-4 py-3">{{ p.department|default:"—" }}</td>
-        <td class="px-4 py-3">{{ p.base_salary|floatformat:0 }} FCFA</td>
-        <td class="px-4 py-3 text-right">
-          <a class="text-indigo-600 hover:underline" href="{% url 'employees:position_update' p.pk %}">Modifier</a> ·
-          <a class="text-red-600 hover:underline" href="{% url 'employees:position_delete' p.pk %}">Supprimer</a>
-        </td>
-      </tr>
-      {% empty %}<tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">Aucun poste.</td></tr>{% endfor %}
-    </tbody>
-  </table>
+<div class="card">
+  <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
+    <table class="is-hoverable w-full text-left">
+      <thead><tr>
+        <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Intitulé</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Département</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Salaire indicatif</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5"></th>
+      </tr></thead>
+      <tbody>
+        {% for p in positions %}
+        <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5 font-medium text-slate-700 dark:text-navy-100">{{ p.title }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ p.department|default:"—" }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ p.base_salary|floatformat:0 }} FCFA</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5 text-right">
+            <a class="text-primary hover:underline dark:text-accent-light" href="{% url 'employees:position_update' p.pk %}">Modifier</a>
+            <span class="px-1 text-slate-300">·</span>
+            <a class="text-error hover:underline" href="{% url 'employees:position_delete' p.pk %}">Supprimer</a>
+          </td>
+        </tr>
+        {% empty %}<tr><td colspan="4" class="px-5 py-10 text-center text-slate-400 dark:text-navy-300">Aucun poste.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

@@ -3,23 +3,44 @@ from django import forms
 from .models import Contract, Department, Employee, Position
 
 INPUT = (
-    "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm "
-    "focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+    "form-input w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 "
+    "placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary "
+    "dark:border-navy-450 dark:hover:border-navy-400 dark:focus:border-accent"
+)
+SELECT = (
+    "form-select w-full rounded-lg border border-slate-300 bg-white px-3 py-2 "
+    "hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:bg-navy-700 "
+    "dark:hover:border-navy-400 dark:focus:border-accent"
+)
+TEXTAREA = (
+    "form-textarea w-full rounded-lg border border-slate-300 bg-transparent p-2.5 "
+    "placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary "
+    "dark:border-navy-450 dark:hover:border-navy-400 dark:focus:border-accent"
+)
+CHECKBOX = (
+    "form-checkbox is-basic size-5 rounded-sm border-slate-400/70 checked:border-primary "
+    "checked:bg-primary hover:border-primary focus:border-primary dark:border-navy-400 "
+    "dark:checked:border-accent dark:checked:bg-accent dark:hover:border-accent dark:focus:border-accent"
 )
 
 
 class StyledFormMixin:
-    """Applique les classes Tailwind à tous les champs."""
+    """Applique les classes du thème Lineone à tous les champs."""
 
     def _style_fields(self):
         for field in self.fields.values():
             widget = field.widget
             if isinstance(widget, forms.CheckboxInput):
-                widget.attrs.setdefault("class", "h-4 w-4 rounded border-slate-300")
+                css = CHECKBOX
+            elif isinstance(widget, forms.Select):
+                css = SELECT
+            elif isinstance(widget, forms.Textarea):
+                css = TEXTAREA
             elif isinstance(widget, forms.FileInput):
-                widget.attrs.setdefault("class", "text-sm")
+                css = INPUT + " text-sm"
             else:
-                widget.attrs.setdefault("class", INPUT)
+                css = INPUT
+            widget.attrs.setdefault("class", css)
 
 
 class CompanyModelForm(StyledFormMixin, forms.ModelForm):

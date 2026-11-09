@@ -1,13 +1,15 @@
 {% extends "base.html" %}
 {% block title %}Confirmer la suppression{% endblock %}
 {% block content %}
-<div class="mx-auto max-w-lg rounded-xl bg-white p-6 shadow-sm">
-  <h1 class="mb-2 text-xl font-bold">Confirmer la suppression</h1>
-  <p class="mb-6 text-sm text-slate-600">Voulez-vous vraiment supprimer « {{ object }} » ? Cette action est irréversible.</p>
-  <form method="post" class="flex justify-end gap-3">
-    {% csrf_token %}
-    <a href="{{ cancel_url }}" class="rounded-lg border px-4 py-2 text-sm hover:bg-slate-50">Annuler</a>
-    <button class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">Supprimer</button>
-  </form>
+<div class="mx-auto max-w-lg">
+  <div class="card p-5">
+    <h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50">Confirmer la suppression</h2>
+    <p class="mt-2 text-sm text-slate-500 dark:text-navy-200">Voulez-vous vraiment supprimer « {{ object }} » ? Cette action est irréversible.</p>
+    <form method="post" class="mt-6 flex justify-end space-x-2">
+      {% csrf_token %}
+      <a href="{{ cancel_url }}" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">Annuler</a>
+      <button class="btn bg-error font-medium text-white hover:bg-error-focus focus:bg-error-focus active:bg-error-focus/90">Supprimer</button>
+    </form>
+  </div>
 </div>
 {% endblock %}

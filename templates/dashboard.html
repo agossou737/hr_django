@@ -1,46 +1,190 @@
 {% extends "base.html" %}
 {% block title %}Tableau de bord{% endblock %}
 {% block content %}
-<h1 class="mb-6 text-2xl font-bold">Tableau de bord</h1>
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <div>
+    <h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Tableau de bord</h2>
+    <p class="text-xs-plus text-slate-400 dark:text-navy-300">{% if company %}{{ company }} · {% endif %}Vue d'ensemble des ressources humaines</p>
+  </div>
+  {% if company and user.can_manage_hr %}
+  <a href="{% url 'employees:create' %}" class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">+ Nouvel employé</a>
+  {% endif %}
+</div>
 
 {% if not company %}
-<div class="rounded-xl bg-amber-50 p-6 text-sm text-amber-900">
+<div class="card p-5 text-sm text-warning">
   Ce compte n'est rattaché à aucune entreprise. Créez une entreprise et rattachez-y des utilisateurs depuis
   {% if user.is_staff %}<a class="underline" href="{% url 'admin:index' %}">l'administration</a>{% else %}l'administration{% endif %}.
 </div>
 {% else %}
-<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-  <div class="rounded-xl bg-white p-5 shadow-sm"><div class="text-sm text-slate-500">Employés</div><div class="mt-1 text-3xl font-bold">{{ total_employees }}</div></div>
-  <div class="rounded-xl bg-white p-5 shadow-sm"><div class="text-sm text-slate-500">Actifs</div><div class="mt-1 text-3xl font-bold text-emerald-600">{{ active_employees }}</div></div>
-  <div class="rounded-xl bg-white p-5 shadow-sm"><div class="text-sm text-slate-500">En congé</div><div class="mt-1 text-3xl font-bold text-amber-600">{{ on_leave_employees }}</div></div>
-  <div class="rounded-xl bg-white p-5 shadow-sm"><div class="text-sm text-slate-500">Départements</div><div class="mt-1 text-3xl font-bold text-indigo-600">{{ departments_count }}</div></div>
+
+<!-- Indicateurs -->
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4 lg:gap-6">
+  <div class="card flex-row items-center justify-between p-4 sm:p-5">
+    <div>
+      <p class="text-xs-plus uppercase text-slate-400 dark:text-navy-300">Effectif total</p>
+      <p class="mt-1 text-2xl font-semibold text-slate-700 dark:text-navy-100">{{ total_employees }}</p>
+    </div>
+    <div class="flex size-11 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-accent-light/10 dark:text-accent-light">
+      <svg class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+    </div>
+  </div>
+  <div class="card flex-row items-center justify-between p-4 sm:p-5">
+    <div>
+      <p class="text-xs-plus uppercase text-slate-400 dark:text-navy-300">Actifs</p>
+      <p class="mt-1 text-2xl font-semibold text-success">{{ active_employees }}</p>
+    </div>
+    <div class="flex size-11 items-center justify-center rounded-lg bg-success/10 text-success">
+      <svg class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    </div>
+  </div>
+  <div class="card flex-row items-center justify-between p-4 sm:p-5">
+    <div>
+      <p class="text-xs-plus uppercase text-slate-400 dark:text-navy-300">En congé</p>
+      <p class="mt-1 text-2xl font-semibold text-warning">{{ on_leave_employees }}</p>
+    </div>
+    <div class="flex size-11 items-center justify-center rounded-lg bg-warning/10 text-warning">
+      <svg class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+    </div>
+  </div>
+  <div class="card flex-row items-center justify-between p-4 sm:p-5">
+    <div>
+      <p class="text-xs-plus uppercase text-slate-400 dark:text-navy-300">Départements</p>
+      <p class="mt-1 text-2xl font-semibold text-info">{{ departments_count }}</p>
+    </div>
+    <div class="flex size-11 items-center justify-center rounded-lg bg-info/10 text-info">
+      <svg class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+    </div>
+  </div>
 </div>
 
-<div class="mt-6 grid gap-6 lg:grid-cols-3">
-  <div class="rounded-xl bg-white p-5 shadow-sm">
-    <h2 class="mb-3 font-semibold">Effectif par département</h2>
-    <ul class="space-y-2 text-sm">
-      {% for row in by_department %}
-      <li class="flex justify-between"><span>{{ row.department__name|default:"Sans département" }}</span><span class="font-semibold">{{ row.total }}</span></li>
-      {% empty %}<li class="text-slate-500">Aucune donnée.</li>{% endfor %}
-    </ul>
+{% if total_employees %}
+{{ department_chart|json_script:"department-data" }}
+{{ gender_chart|json_script:"gender-data" }}
+{{ hires_chart|json_script:"hires-data" }}
+
+<!-- Graphiques -->
+<div class="mt-4 grid grid-cols-1 gap-4 sm:mt-5 sm:gap-5 lg:mt-6 lg:grid-cols-3 lg:gap-6">
+  <div class="card px-4 pb-4 sm:px-5 lg:col-span-2">
+    <div class="flex h-14 items-center justify-between">
+      <h2 class="font-medium tracking-wide text-slate-700 line-clamp-1 dark:text-navy-100">Effectif par département</h2>
+    </div>
+    <div x-init="$nextTick(() => {
+      const d = JSON.parse(document.getElementById('department-data').textContent);
+      $el._x_chart = new ApexCharts($el, {
+        colors: ['#4467EF'],
+        series: [{ name: 'Employés', data: d.series }],
+        chart: { type: 'bar', height: Math.max(220, d.labels.length * 44), toolbar: { show: false }, animations: { enabled: false } },
+        plotOptions: { bar: { horizontal: true, borderRadius: 5, barHeight: '55%' } },
+        dataLabels: { enabled: true, style: { fontSize: '12px', colors: ['#fff'] } },
+        xaxis: { categories: d.labels, labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
+        grid: { padding: { left: 0, right: 0 } },
+        legend: { show: false }
+      });
+      $el._x_chart.render();
+    })"></div>
   </div>
-  <div class="rounded-xl bg-white p-5 shadow-sm">
-    <h2 class="mb-3 font-semibold">Dernières embauches</h2>
-    <ul class="space-y-2 text-sm">
-      {% for e in recent_hires %}
-      <li class="flex justify-between"><a class="text-indigo-600 hover:underline" href="{% url 'employees:detail' e.pk %}">{{ e.full_name }}</a><span class="text-slate-500">{{ e.hire_date|date:"d/m/Y" }}</span></li>
-      {% empty %}<li class="text-slate-500">Aucun employé.</li>{% endfor %}
-    </ul>
+
+  <div class="card px-4 pb-4 sm:px-5">
+    <div class="flex h-14 items-center justify-between">
+      <h2 class="font-medium tracking-wide text-slate-700 line-clamp-1 dark:text-navy-100">Répartition par sexe</h2>
+    </div>
+    <div x-init="$nextTick(() => {
+      const d = JSON.parse(document.getElementById('gender-data').textContent);
+      $el._x_chart = new ApexCharts($el, {
+        colors: ['#4467EF', '#F000B9'],
+        series: d.series,
+        labels: d.labels,
+        chart: { type: 'donut', height: 260, animations: { enabled: false } },
+        legend: { position: 'bottom' },
+        dataLabels: { enabled: true, style: { colors: ['#fff'] }, dropShadow: { enabled: false } },
+        stroke: { width: 0 }
+      });
+      $el._x_chart.render();
+    })"></div>
   </div>
-  <div class="rounded-xl bg-white p-5 shadow-sm">
-    <h2 class="mb-3 font-semibold">Contrats arrivant à échéance (60 j)</h2>
-    <ul class="space-y-2 text-sm">
+</div>
+
+<div class="mt-4 grid grid-cols-1 gap-4 sm:mt-5 sm:gap-5 lg:mt-6 lg:grid-cols-3 lg:gap-6">
+  <div class="card px-4 pb-4 sm:px-5 lg:col-span-2">
+    <div class="flex h-14 items-center justify-between">
+      <h2 class="font-medium tracking-wide text-slate-700 line-clamp-1 dark:text-navy-100">Embauches des 6 derniers mois</h2>
+    </div>
+    <div x-init="$nextTick(() => {
+      const d = JSON.parse(document.getElementById('hires-data').textContent);
+      $el._x_chart = new ApexCharts($el, {
+        colors: ['#10B981'],
+        series: [{ name: 'Embauches', data: d.series }],
+        chart: { type: 'bar', height: 260, toolbar: { show: false } },
+        plotOptions: { bar: { borderRadius: 5, columnWidth: '40%' } },
+        dataLabels: { enabled: false },
+        xaxis: { categories: d.labels, axisBorder: { show: false }, axisTicks: { show: false } },
+        yaxis: { labels: { formatter: (v) => Math.round(v) }, forceNiceScale: true, min: 0 },
+        legend: { show: false }
+      });
+      $el._x_chart.render();
+    })"></div>
+  </div>
+
+  <!-- Contrats à échéance -->
+  <div class="card pb-4">
+    <div class="flex h-14 items-center justify-between px-4 sm:px-5">
+      <h2 class="font-medium tracking-wide text-slate-700 line-clamp-1 dark:text-navy-100">Contrats à échéance (60 j)</h2>
+    </div>
+    <ul class="space-y-3 px-4 sm:px-5">
       {% for c in expiring_contracts %}
-      <li class="flex justify-between"><a class="text-indigo-600 hover:underline" href="{% url 'employees:detail' c.employee.pk %}">{{ c.employee.full_name }}</a><span class="text-red-600">{{ c.end_date|date:"d/m/Y" }}</span></li>
-      {% empty %}<li class="text-slate-500">Aucune échéance proche.</li>{% endfor %}
+      <li class="flex items-center justify-between space-x-3">
+        <div class="min-w-0">
+          <a href="{% url 'employees:detail' c.employee.pk %}" class="block truncate font-medium text-slate-700 hover:text-primary dark:text-navy-100 dark:hover:text-accent-light">{{ c.employee.full_name }}</a>
+          <p class="text-xs text-slate-400 dark:text-navy-300">{{ c.get_contract_type_display }}</p>
+        </div>
+        <span class="shrink-0 rounded-full bg-error/10 px-2.5 py-1 text-xs font-medium text-error">{{ c.end_date|date:"d/m/Y" }}</span>
+      </li>
+      {% empty %}
+      <li class="text-sm text-slate-400 dark:text-navy-300">Aucune échéance proche.</li>
+      {% endfor %}
     </ul>
   </div>
 </div>
+
+<!-- Dernières embauches -->
+<div class="card mt-4 sm:mt-5 lg:mt-6">
+  <div class="flex items-center justify-between px-4 py-4 sm:px-5">
+    <h2 class="font-medium tracking-wide text-slate-700 line-clamp-1 dark:text-navy-100">Dernières embauches</h2>
+    {% if user.can_manage_hr %}<a href="{% url 'employees:list' %}" class="border-b border-dotted border-current pb-0.5 text-xs-plus font-medium text-primary outline-hidden transition-colors duration-300 hover:text-primary/70 focus:text-primary/70 dark:text-accent-light dark:hover:text-accent-light/70">Voir tout</a>{% endif %}
+  </div>
+  <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
+    <table class="is-hoverable w-full text-left">
+      <thead>
+        <tr>
+          <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Employé</th>
+          <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Poste</th>
+          <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Embauché le</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in recent_hires %}
+        <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">
+            <div class="flex items-center space-x-3">
+              <div class="avatar size-9"><div class="is-initial rounded-full bg-info/10 text-xs uppercase text-info">{{ e.first_name|slice:":1" }}{{ e.last_name|slice:":1" }}</div></div>
+              <a href="{% url 'employees:detail' e.pk %}" class="font-medium text-slate-700 hover:text-primary dark:text-navy-100 dark:hover:text-accent-light">{{ e.full_name }}</a>
+            </div>
+          </td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ e.position|default:"—" }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ e.hire_date|date:"d/m/Y" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="card mt-4 items-center p-10 text-center sm:mt-5 lg:mt-6">
+  <p class="text-lg font-medium text-slate-700 dark:text-navy-100">Aucun employé pour l'instant</p>
+  <p class="mt-1 text-sm text-slate-400 dark:text-navy-300">Ajoutez vos départements, vos postes puis vos premiers employés pour voir les statistiques.</p>
+  {% if user.can_manage_hr %}<a href="{% url 'employees:create' %}" class="btn mt-5 bg-primary font-medium text-white hover:bg-primary-focus dark:bg-accent dark:hover:bg-accent-focus">+ Ajouter un employé</a>{% endif %}
+</div>
+{% endif %}
 {% endif %}
 {% endblock %}

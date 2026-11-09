@@ -1,8 +1,9 @@
-from datetime import timedelta
+from datetime import date, timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.db.models import Count
+from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from django.views.generic import TemplateView
 
@@ -40,7 +41,41 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             .annotate(total=Count("id"))
             .order_by("-total")
         )
-        ctx["recent_hires"] = employees.order_by("-hire_date")[:5]
+        ctx["recent_hires"] = employees.select_related("position").order_by("-hire_date")[:6]
+
+        # Données des graphiques (sérialisées via json_script dans le template)
+        staff = employees.exclude(status=Employee.Status.LEFT)
+        by_gender = {row["gender"]: row["total"] for row in staff.values("gender").annotate(total=Count("id"))}
+        ctx["gender_chart"] = {
+            "labels": ["Hommes", "Femmes"],
+            "series": [by_gender.get("M", 0), by_gender.get("F", 0)],
+        }
+        ctx["department_chart"] = {
+            "labels": [r["department__name"] or "Sans département" for r in ctx["by_department"]],
+            "series": [r["total"] for r in ctx["by_department"]],
+        }
+        # Embauches des 6 derniers mois (mois courant inclus)
+        months = []
+        year, month = today.year, today.month
+        for _ in range(6):
+            months.append((year, month))
+            month -= 1
+            if month == 0:
+                year, month = year - 1, 12
+        months.reverse()
+        first_month = date(months[0][0], months[0][1], 1)
+        hires = {
+            (row["m"].year, row["m"].month): row["total"]
+            for row in employees.filter(hire_date__gte=first_month)
+            .annotate(m=TruncMonth("hire_date"))
+            .values("m")
+            .annotate(total=Count("id"))
+        }
+        month_names = ["Janv.", "Févr.", "Mars", "Avr.", "Mai", "Juin", "Juil.", "Août", "Sept.", "Oct.", "Nov.", "Déc."]
+        ctx["hires_chart"] = {
+            "labels": [month_names[m - 1] for _, m in months],
+            "series": [hires.get(key, 0) for key in months],
+        }
         ctx["expiring_contracts"] = Contract.objects.filter(
             company=company,
             is_current=True,

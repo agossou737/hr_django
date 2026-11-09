@@ -47,6 +47,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "config.context.branding",
             ],
         },
     },
@@ -73,6 +74,10 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+
+# Identité du produit (modifiable ici : nom affiché partout dans l'interface)
+APP_NAME = config("APP_NAME", default="Ruche RH")
+APP_TAGLINE = config("APP_TAGLINE", default="Gestion RH & pointage facial")
 
 AUTH_USER_MODEL = "accounts.User"
 
