@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Pointer par empreinte{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-xl space-y-4 text-center">
+<h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Pointer par empreinte</h2>
+{% if not allowed %}<div class="card p-5 text-sm text-warning">Le pointage depuis votre appareil n'est pas activé par votre entreprise. Utilisez la borne de pointage.</div>
+{% else %}
+<div class="card p-6">
+  <p class="mb-4 text-sm text-slate-500 dark:text-navy-200">{% if is_staff_kiosk %}Mode borne : toute personne enregistrée sur cet appareil peut pointer.{% else %}Posez votre doigt sur le capteur de votre appareil (ou utilisez son déverrouillage biométrique).{% endif %}</p>
+  <button id="clock" class="btn h-14 w-full bg-primary text-base font-medium text-white hover:bg-primary-focus dark:bg-accent">Pointer maintenant</button>
+  <p id="msg" class="mt-4 text-sm"></p>
+</div>{% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}<script>
+const b64u = {
+  dec: s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(s.length / 4) * 4, "=")), c => c.charCodeAt(0)),
+  enc: b => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""),
+};
+const csrf = () => (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || "";
+async function post(url, data) {
+  const r = await fetch(url, {method: "POST", headers: {"Content-Type": "application/json", "X-CSRFToken": csrf()}, body: JSON.stringify(data || {})});
+  return {ok: r.ok, data: await r.json().catch(() => ({message: "Réponse invalide du serveur."}))};
+}
+</script>
+<script>
+const btn = document.getElementById("clock");
+if (btn) btn.addEventListener("click", async () => {
+  const msg = document.getElementById("msg"); msg.className = "mt-4 text-sm"; msg.textContent = "";
+  if (!window.PublicKeyCredential) { msg.className += " text-error"; msg.textContent = "Ce navigateur ne gère pas WebAuthn (HTTPS requis)."; return; }
+  try {
+    const o = await post("{% url 'biometrics:clock_options' %}"); if (!o.ok) throw new Error(o.data.message);
+    const opts = o.data; opts.challenge = b64u.dec(opts.challenge);
+    const a = await navigator.credentials.get({publicKey: opts});
+    const payload = {id: a.id, rawId: b64u.enc(a.rawId), type: a.type, response: {
+      clientDataJSON: b64u.enc(a.response.clientDataJSON), authenticatorData: b64u.enc(a.response.authenticatorData),
+      signature: b64u.enc(a.response.signature), userHandle: a.response.userHandle ? b64u.enc(a.response.userHandle) : null},
+      clientExtensionResults: a.getClientExtensionResults()};
+    const v = await post("{% url 'biometrics:clock_verify' %}", {credential: payload});
+    const d = v.data;
+    msg.className += v.ok && d.success ? " text-success" : " text-error";
+    msg.textContent = v.ok ? ((d.employee ? d.employee.name + " — " : "") + d.message + (d.time ? " (" + d.time + ")" : "") + (d.late_minutes ? " · retard " + d.late_minutes + " min" : "")) : d.message;
+  } catch (e) { msg.className += " text-error"; msg.textContent = e.message || "Pointage annulé."; }
+});
+</script>{% endblock %}

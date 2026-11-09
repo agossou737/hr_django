@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "explanations",
     "assets",
     "meetings",
+    "biometrics",
 ]
 
 MIDDLEWARE = [
@@ -170,3 +171,8 @@ EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="Ruche RH <no-reply@localhost>")
 # Adresse publique (https://rh.mon-domaine.bj) ajoutée aux liens des e-mails
 SITE_URL = config("SITE_URL", default="").rstrip("/")
+
+# ------------------------------------------------- Empreinte digitale (WebAuthn)
+# Par défaut, le domaine est déduit de la requête ; à fixer derrière certains proxys.
+WEBAUTHN_RP_ID = config("WEBAUTHN_RP_ID", default="")
+WEBAUTHN_ORIGIN = config("WEBAUTHN_ORIGIN", default="")

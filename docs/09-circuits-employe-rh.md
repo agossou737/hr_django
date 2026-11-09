@@ -40,3 +40,41 @@ liste RH exportable.
   et un **PDF de compte rendu** est disponible.
 * **Actions / décisions** : chaque action a un responsable et une échéance ; le responsable est notifié et la coche lui-même.
 * Visibilité : organisateur, participants et RH uniquement (jamais d'autres entreprises).
+
+# Empreinte digitale (étape 9)
+
+Deux méthodes, qui alimentent le même pointage (source « Empreinte digitale ») et déclenchent les mêmes règles
+(retard, demande d'explication automatique, journal des scans).
+
+## 1. Téléphones et PC — WebAuthn
+* Aucune donnée biométrique n'est transmise ni stockée : l'empreinte (ou Face ID, Windows Hello…) déverrouille une
+  clé cryptographique dans l'appareil ; le serveur ne garde que la **clé publique** et vérifie une **signature**
+  (défi à usage unique, domaine vérifié, vérification biométrique obligatoire, compteur anti-clonage).
+* **HTTPS obligatoire** (sauf `localhost`). Le domaine est déduit de la requête ; si besoin, fixer `WEBAUTHN_RP_ID`
+  et `WEBAUTHN_ORIGIN` dans `.env`.
+* Enregistrement : l'employé ouvre *Pointage → Mes appareils biométriques* sur son téléphone/PC et clique sur
+  « Enregistrer cet appareil » (les RH peuvent aussi le faire depuis la fiche employé, sur l'appareil concerné).
+* Pointage : *Pointage → Pointer par empreinte*.
+  * **Mode borne** (compte borne, RH, admin) : n'importe quel employé enregistré sur cet appareil peut pointer.
+  * **Mode personnel** : réservé aux entreprises qui cochent « Autoriser le pointage par empreinte depuis le
+    téléphone/PC de l'employé » (*Entreprise et horaires*) ; l'employé ne peut utiliser que **son** appareil.
+    Désactivé par défaut car il permet de pointer hors des locaux.
+* Les RH révoquent un appareil à tout moment (*Pointage → Empreintes et lecteurs*).
+
+## 2. Lecteurs d'empreintes USB / terminaux — API
+1. *Empreintes et lecteurs* → créer un lecteur : une **clé secrète** est affichée une seule fois (stockée hachée).
+2. Enregistrer les doigts dans le lecteur avec son logiciel, puis déclarer la **correspondance identifiant lecteur → employé**.
+3. Un petit agent sur le PC du lecteur envoie chaque passage :
+
+```
+POST /biometrie/api/lecteur/
+Authorization: Bearer rr_xxxxxxxx
+{"user_id": "12", "timestamp": "2026-03-02T07:58:00+01:00"}   # timestamp facultatif (7 jours max)
+```
+Réponses : `200` pointage enregistré (ou doublon), `404` identifiant inconnu, `401` clé invalide/désactivée.
+Un agent d'exemple prêt à l'emploi est fourni : `deploy/lecteur_agent.py` (lecture d'un fichier CSV ou de l'entrée
+standard ; adaptable à un terminal ZKTeco via `pyzk`).
+
+## Limites à connaître
+* Le lecteur USB doit être raccordé à un PC allumé et connecté (ou un terminal réseau) qui exécute l'agent.
+* L'empreinte WebAuthn dépend du matériel de l'appareil (capteur ou reconnaissance faciale du téléphone).

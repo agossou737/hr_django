@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Lecteur créé{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-2xl space-y-4"><h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50">Lecteur « {{ reader.name }} » créé</h2>
+<div class="card space-y-3 p-5"><p class="text-sm text-warning">Copiez cette clé maintenant : elle ne sera plus jamais affichée.</p>
+<code class="block break-all rounded-lg bg-slate-100 p-3 text-sm dark:bg-navy-600">{{ key }}</code>
+<p class="text-sm text-slate-500">Adresse de l'API : <code>{{ api_url }}</code><br>En-tête : <code>Authorization: Bearer &lt;clé&gt;</code> — corps JSON : <code>{"user_id": "12"}</code></p>
+<a href="{% url 'biometrics:manage' %}" class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus">Terminé</a></div></div>
+{% endblock %}

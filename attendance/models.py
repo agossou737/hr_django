@@ -35,6 +35,7 @@ class AttendanceRecord(CompanyOwnedModel):
 
     class Source(models.TextChoices):
         FACE = "face", "Reconnaissance faciale"
+        FINGERPRINT = "fingerprint", "Empreinte digitale"
         MANUAL = "manual", "Saisie manuelle"
 
     employee = models.ForeignKey(
@@ -43,9 +44,9 @@ class AttendanceRecord(CompanyOwnedModel):
     date = models.DateField("Date")
     check_in = models.DateTimeField("Arrivée")
     check_out = models.DateTimeField("Départ", null=True, blank=True)
-    source_in = models.CharField("Source arrivée", max_length=10, choices=Source.choices, default=Source.FACE)
+    source_in = models.CharField("Source arrivée", max_length=12, choices=Source.choices, default=Source.FACE)
     source_out = models.CharField(
-        "Source départ", max_length=10, choices=Source.choices, default=Source.FACE, blank=True
+        "Source départ", max_length=12, choices=Source.choices, default=Source.FACE, blank=True
     )
     confidence = models.FloatField("Confiance (%)", null=True, blank=True)
     late_minutes = models.PositiveIntegerField("Retard (min)", default=0)
@@ -94,7 +95,7 @@ class ScanLog(CompanyOwnedModel):
         CHECK_IN = "in", "Arrivée enregistrée"
         CHECK_OUT = "out", "Départ enregistré"
         DUPLICATE = "duplicate", "Déjà pointé"
-        UNKNOWN = "unknown", "Visage non reconnu"
+        UNKNOWN = "unknown", "Non reconnu"
         INACTIVE = "inactive", "Employé non actif"
 
     employee = models.ForeignKey(

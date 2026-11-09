@@ -70,12 +70,13 @@ class ScanResult:
         return self.outcome in (ScanLog.Outcome.CHECK_IN, ScanLog.Outcome.CHECK_OUT)
 
 
-def register_scan(company, employee, distance, now=None, device=None):
+def register_scan(company, employee, distance, now=None, device=None, source=None):
     """Enregistre un passage devant la borne et met à jour le pointage du jour.
 
     Règle : le premier passage de la journée est l'arrivée ; tout passage ultérieur,
     espacé d'au moins ATTENDANCE_MIN_INTERVAL_MINUTES du précédent, met à jour le départ.
     """
+    source = source or AttendanceRecord.Source.FACE
     now = now or timezone.now()
     local_now = timezone.localtime(now)
     today = local_now.date()
@@ -89,7 +90,7 @@ def register_scan(company, employee, distance, now=None, device=None):
 
     if employee is None:
         log(Outcome.UNKNOWN)
-        return ScanResult(Outcome.UNKNOWN, distance=distance, message="Visage non reconnu.")
+        return ScanResult(Outcome.UNKNOWN, distance=distance, message="Visage non reconnu." if source == AttendanceRecord.Source.FACE else "Empreinte non reconnue.")
 
     if employee.status != Employee.Status.ACTIVE:
         log(Outcome.INACTIVE)
@@ -113,7 +114,7 @@ def register_scan(company, employee, distance, now=None, device=None):
                 employee=employee,
                 date=today,
                 check_in=now,
-                source_in=AttendanceRecord.Source.FACE,
+                source_in=source,
                 confidence=confidence,
             )
             log(Outcome.CHECK_IN)
@@ -125,7 +126,7 @@ def register_scan(company, employee, distance, now=None, device=None):
             return ScanResult(Outcome.DUPLICATE, employee, record, distance, "Vous avez déjà pointé à l'instant.")
 
         record.check_out = now
-        record.source_out = AttendanceRecord.Source.FACE
+        record.source_out = source
         record.save(update_fields=["check_out", "source_out", "late_minutes"])
         log(Outcome.CHECK_OUT)
         return ScanResult(Outcome.CHECK_OUT, employee, record, distance, "Départ enregistré.")

@@ -55,5 +55,11 @@ class Command(BaseCommand):
         PayrollSettings.for_company(company)
         for d, label in benin_holidays(date.today().year):
             Holiday.objects.get_or_create(company=company, date=d, defaults={"name": label})
+        from assets.models import Asset
+
+        for name, tag, cat, value in [("Ordinateur portable Dell", "PC-001", "computer", 450000),
+                                      ("Téléphone Samsung", "TEL-001", "phone", 120000),
+                                      ("Moto de service", "MOTO-001", "vehicle", 900000)]:
+            Asset.objects.get_or_create(company=company, tag=tag, defaults={"name": name, "category": cat, "value": value})
         self.stdout.write(self.style.SUCCESS(
             "Démo prête : rh@demo.bj (RH) et borne@demo.bj (borne de pointage), mot de passe demo12345"))

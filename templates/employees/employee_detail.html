@@ -62,6 +62,7 @@
       <p class="text-xs-plus text-slate-400 dark:text-navy-300">{% if face_samples %}Visage enrôlé ({{ face_samples }} échantillon{{ face_samples|pluralize }}){% else %}Visage non enrôlé{% endif %}</p>
     </div>
     <a href="{% url 'attendance:enroll' employee.pk %}" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">{% if face_samples %}Ré-enrôler le visage{% else %}Enrôler le visage{% endif %}</a>
+    <a href="{% url 'biometrics:employee' employee.pk %}" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-100">Empreinte digitale</a>
   </div>
 </div>
 

@@ -17,7 +17,7 @@ class CompanySettingsForm(StyledFormMixin, forms.ModelForm):
         fields = [
             "name", "ifu", "rccm", "cnss_number", "address", "city", "phone", "email", "logo",
             "work_start_time", "work_end_time", "late_tolerance_minutes",
-            "auto_explanation", "explanation_deadline_days",
+            "auto_explanation", "explanation_deadline_days", "fingerprint_self_service",
         ]
         widgets = {
             "work_start_time": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),

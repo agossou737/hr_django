@@ -32,12 +32,15 @@ SECTIONS = [
         ],
     ),
     (
-        "attendance", "Pointage", "clock", HR | KIOSK,
+        "attendance", "Pointage", "clock", STAFF | KIOSK,
         [
             ("Borne de pointage", "attendance:kiosk", HR | KIOSK),
             ("Présences", "attendance:list", HR),
             ("Rapport mensuel", "attendance:monthly", HR),
             ("Journal des scans", "attendance:logs", HR),
+            ("Pointer par empreinte", "biometrics:clock", HR | KIOSK | {"manager", "employee"}),
+            ("Mes appareils biométriques", "biometrics:mine", {"manager", "employee"}),
+            ("Empreintes et lecteurs", "biometrics:manage", HR),
         ],
     ),
     (

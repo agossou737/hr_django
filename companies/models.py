@@ -27,6 +27,10 @@ class Company(models.Model):
         "Demande d'explication automatique en cas de retard", default=True,
         help_text="Chaque pointage en retard génère une demande d'explication adressée à l'employé.",
     )
+    fingerprint_self_service = models.BooleanField(
+        "Autoriser le pointage par empreinte depuis le téléphone/PC de l'employé", default=False,
+        help_text="Chaque employé pointe depuis son propre appareil (biométrie). Désactivé : seule la borne de l'entreprise pointe.",
+    )
     explanation_deadline_days = models.PositiveSmallIntegerField(
         "Délai de réponse (jours)", default=2, help_text="Au-delà, l'employé est relancé automatiquement."
     )

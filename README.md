@@ -40,7 +40,7 @@ Nouveau client : `python manage.py create_company --name "Client SARL" --admin-e
 6. [Paie Bénin : paramètres, calcul, périmètre](docs/06-paie-benin.md)
 7. [Architecture technique](docs/07-architecture.md)
 8. [Proposer le produit à des entreprises](docs/08-commercialisation.md)
-9. [Circuits employé ↔ RH : explications, intérim, permissions](docs/09-circuits-employe-rh.md)
+9. [Circuits employé ↔ RH, matériel, réunions, empreinte digitale](docs/09-circuits-employe-rh.md)
 
 ## Points d'attention
 - **HTTPS obligatoire** en production (la caméra du navigateur l'exige hors `localhost`).
