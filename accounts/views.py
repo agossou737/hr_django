@@ -24,6 +24,8 @@ class UserLoginView(LoginView):
         user = self.request.user
         if user.is_authenticated and user.is_kiosk:
             return reverse("attendance:kiosk")
+        if user.is_authenticated and user.is_superuser:
+            return reverse("superadmin:dashboard")
         return super().get_default_redirect_url()
 
 
@@ -72,6 +74,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated and request.user.is_kiosk:
             return redirect("attendance:kiosk")
+        if request.user.is_authenticated and request.user.is_superuser:
+            return redirect("superadmin:dashboard")
         return super().dispatch(request, *args, **kwargs)
 
     def _self_context(self, ctx, company, today):

@@ -18,6 +18,7 @@ ICONS = {
     "shield": "M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285zM12 15.75h.008v.008H12v-.008z",
     "cube": "M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9",
     "group": "M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z",
+    "building": "M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21",
     "cog": "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z",
 }
 
@@ -130,8 +131,36 @@ SECTIONS = [
 ]
 
 
+SUPER_SECTIONS = [
+    ("sa-dashboard", "Plateforme", "dashboard", [("Vue d'ensemble", "superadmin:dashboard")]),
+    ("sa-companies", "Entreprises", "building", [("Entreprises clientes", "superadmin:companies"),
+                                                 ("Nouvelle entreprise", "superadmin:company_create")]),
+    ("sa-users", "Utilisateurs", "users", [("Tous les utilisateurs", "superadmin:users")]),
+    ("sa-admins", "Super-administrateurs", "shield", [("Super-administrateurs", "superadmin:admins"),
+                                                        ("Nouveau super-administrateur", "superadmin:admin_create")]),
+]
+
+
+def _build_super_nav(request):
+    sections, path = [], request.path
+    for key, label, icon, children in SUPER_SECTIONS:
+        items = [{"label": lab, "url": reverse(name), "active": False} for lab, name in children]
+        active = None
+        for item in items:
+            if path == item["url"] or (item["url"] != "/plateforme/" and path.startswith(item["url"])):
+                if active is None or len(item["url"]) > len(active["url"]):
+                    active = item
+        if active:
+            active["active"] = True
+        sections.append({"key": key, "label": label, "url": items[0]["url"], "icon": ICONS[icon], "items": items,
+                         "active": active is not None})
+    return sections
+
+
 def _build_nav(request, user):
     """Construit la navigation visible par l'utilisateur ; ignore les modules non installés."""
+    if user and user.is_authenticated and user.is_superuser:
+        return _build_super_nav(request)
     if not (user and user.is_authenticated and user.company_id):
         return []
     role = user.role

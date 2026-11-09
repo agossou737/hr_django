@@ -1,16 +1,11 @@
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib import admin
 from django.urls import include, path
 
 from accounts.views import DashboardView
 
-admin.site.site_header = "Ruche RH — Administration"
-admin.site.site_title = "Ruche RH"
-admin.site.index_title = "Administration de la plateforme"
-
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("plateforme/", include("superadmin.urls")),
     path("", DashboardView.as_view(), name="dashboard"),
     path("compte/", include("accounts.urls")),
     path("employes/", include("employees.urls")),

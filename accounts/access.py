@@ -41,9 +41,14 @@ def create_access(employee, email=None, role=User.Role.EMPLOYEE, send_email=True
     return user, password
 
 
+def send_invitation_platform(user, password):
+    send_invitation(user, password)
+
+
 def send_invitation(user, password):
     base = getattr(settings, "SITE_URL", "")
-    body = (f"Bonjour {user.first_name},\n\nVotre accès à {settings.APP_NAME} ({user.company.name}) a été créé.\n\n"
+    where = f" ({user.company.name})" if user.company_id else " (administration de la plateforme)"
+    body = (f"Bonjour {user.first_name},\n\nVotre accès à {settings.APP_NAME}{where} a été créé.\n\n"
             f"Adresse de connexion : {base}/compte/connexion/\nIdentifiant : {user.email}\n"
             f"Mot de passe temporaire : {password}\n\n"
             "Vous devrez choisir un nouveau mot de passe dès votre première connexion.")

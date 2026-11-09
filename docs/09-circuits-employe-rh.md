@@ -104,3 +104,15 @@ Créer une fiche ou importer des employés **ne crée pas** de compte : l'accès
   nouveau à sa première connexion. Il peut ensuite le changer à tout moment (menu du profil → *Changer mon mot de passe*).
 * *Réinitialiser le mot de passe* est disponible sur la fiche pour un compte existant.
 * La connexion ignore la casse de l'adresse e-mail (`Jean@X.bj` = `jean@x.bj`).
+
+# Console de la plateforme (super-administrateur)
+
+L'administration Django par défaut (`/admin/`) est **supprimée** : le super-administrateur utilise `/plateforme/`, dans le même
+design que le reste de l'application.
+* **Vue d'ensemble** : entreprises, nouvelles du mois, utilisateurs, employés gérés.
+* **Entreprises** : liste filtrable, création (entreprise + administrateur avec mot de passe temporaire, congés par défaut,
+  jours fériés du Bénin et paramètres de paie), modification, **suspension / réactivation** (les utilisateurs d'une entreprise
+  suspendue sont déconnectés), ajout d'un administrateur.
+* **Utilisateurs** : tous les comptes clients, recherche, activation/désactivation, réinitialisation du mot de passe.
+* **Super-administrateurs** : liste et création (mot de passe temporaire).
+* Création du premier super-administrateur : `python manage.py createsuperuser`. La commande `create_company` reste disponible.

@@ -36,20 +36,10 @@ class Command(BaseCommand):
         except ValidationError as exc:
             raise CommandError(" ".join(exc.messages))
 
-        base = slugify(opts["name"]) or "entreprise"
-        slug, n = base, 2
-        while Company.objects.filter(slug=slug).exists():
-            slug, n = f"{base}-{n}", n + 1
+        from companies.onboarding import onboard_company
 
-        company = Company.objects.create(name=opts["name"], slug=slug, city=opts["city"])
-        User.objects.create_user(
-            email=email, password=password, company=company, role=User.Role.ADMIN,
-            first_name=opts["first_name"], last_name=opts["last_name"],
-        )
-        create_default_types(company)
-        PayrollSettings.for_company(company)
-        year = timezone.localdate().year
-        for date, label in benin_holidays(year):
-            Holiday.objects.get_or_create(company=company, date=date, defaults={"name": label})
+        company, _ = onboard_company(opts["name"], email, password, opts["first_name"], opts["last_name"],
+                                     city=opts["city"])
+        slug = company.slug
         self.stdout.write(self.style.SUCCESS(
             f"Entreprise « {company.name} » créée (identifiant {slug}). Administrateur : {email}."))

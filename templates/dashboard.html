@@ -13,8 +13,7 @@
 
 {% if not company %}
 <div class="card p-5 text-sm text-warning">
-  Ce compte n'est rattaché à aucune entreprise. Créez une entreprise et rattachez-y des utilisateurs depuis
-  {% if user.is_staff %}<a class="underline" href="{% url 'admin:index' %}">l'administration</a>{% else %}l'administration{% endif %}.
+  Ce compte n'est rattaché à aucune entreprise. Contactez l'administrateur de la plateforme.
 </div>
 {% else %}
 

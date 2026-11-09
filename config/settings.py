@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "expenses",
     "training",
     "discipline",
+    "superadmin",
 ]
 
 MIDDLEWARE = [
@@ -51,8 +52,9 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "accounts.middleware.ForcePasswordChangeMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "accounts.middleware.SuspendedCompanyMiddleware",
+    "accounts.middleware.ForcePasswordChangeMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
