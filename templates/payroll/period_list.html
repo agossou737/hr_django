@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Périodes de paie{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <div><h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Périodes de paie</h2><p class="text-xs-plus text-slate-400 dark:text-navy-300">Une période = un mois de paie</p></div>
+  <div class="flex gap-2"><a href="{% url 'payroll:settings' %}" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">Paramètres de paie</a><a href="{% url 'payroll:period_create' %}" class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">+ Nouvelle période</a></div>
+</div>
+<div class="card"><div class="is-scrollbar-hidden min-w-full overflow-x-auto"><table class="is-hoverable w-full text-left">
+  <thead><tr><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Période</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Statut</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Bulletins</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5"></th></tr></thead><tbody>
+  {% for p in periods %}<tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
+    <td class="whitespace-nowrap px-4 py-3 sm:px-5 font-medium">{{ p.label }}</td>
+    <td class="whitespace-nowrap px-4 py-3 sm:px-5"><span class="rounded-full px-2.5 py-1 text-xs font-medium {% if p.is_draft %}bg-warning/10 text-warning{% else %}bg-success/10 text-success{% endif %}">{{ p.get_status_display }}</span></td>
+    <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ p.payslips.count }}</td>
+    <td class="whitespace-nowrap px-4 py-3 sm:px-5 text-right"><a class="text-primary hover:underline dark:text-accent-light" href="{% url 'payroll:period_detail' p.pk %}">Ouvrir</a></td>
+  </tr>{% empty %}<tr><td colspan="4" class="px-5 py-10 text-center text-slate-400">Aucune période. Créez la première pour calculer la paie.</td></tr>{% endfor %}
+  </tbody></table></div></div>
+{% endblock %}

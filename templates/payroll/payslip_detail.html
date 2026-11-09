@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Bulletin {{ payslip.employee.full_name }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <div><a href="{% url 'payroll:period_detail' period.pk %}" class="text-sm text-slate-400 hover:text-primary dark:text-navy-300">← {{ period.label }}</a>
+  <h2 class="mt-1 text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">{{ payslip.employee.full_name }} — {{ period.label }}</h2></div>
+  <div class="flex gap-2"><a target="_blank" href="{% url 'payroll:payslip_pdf' payslip.pk %}" class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">Télécharger le PDF</a>
+  {% if period.is_draft %}<a href="{% url 'payroll:item_create' payslip.pk %}" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">+ Prime / retenue</a>{% endif %}</div>
+</div>
+<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+  <div class="card p-5"><h3 class="mb-3 font-medium">Détail du calcul</h3>
+    <dl class="space-y-2 text-sm">
+      <div class="flex justify-between"><dt>Salaire de base</dt><dd>{{ payslip.base_salary|floatformat:0 }}</dd></div>
+      {% if payslip.unpaid_deduction %}<div class="flex justify-between"><dt>Absences non rémunérées ({{ payslip.unpaid_days|floatformat:"-1" }} j)</dt><dd class="text-error">− {{ payslip.unpaid_deduction|floatformat:0 }}</dd></div>{% endif %}
+      {% if payslip.extra_earnings %}<div class="flex justify-between"><dt>Primes et indemnités</dt><dd>+ {{ payslip.extra_earnings|floatformat:0 }}</dd></div>{% endif %}
+      <div class="flex justify-between border-t pt-2 font-semibold"><dt>Brut</dt><dd>{{ payslip.gross|floatformat:0 }}</dd></div>
+      <div class="flex justify-between"><dt>CNSS salarié ({{ settings.cnss_employee_rate|floatformat:"-2" }} % de {{ payslip.contribution_base|floatformat:0 }})</dt><dd class="text-error">− {{ payslip.cnss_employee|floatformat:0 }}</dd></div>
+      <div class="flex justify-between"><dt>ITS (base {{ payslip.its_base|floatformat:0 }})</dt><dd class="text-error">− {{ payslip.its|floatformat:0 }}</dd></div>
+      {% if payslip.other_deductions %}<div class="flex justify-between"><dt>Autres retenues</dt><dd class="text-error">− {{ payslip.other_deductions|floatformat:0 }}</dd></div>{% endif %}
+      <div class="flex justify-between border-t pt-2 text-base font-semibold"><dt>Net à payer</dt><dd class="text-success">{{ payslip.net|floatformat:0 }} FCFA</dd></div>
+    </dl>
+    <h3 class="mb-2 mt-6 font-medium">Charges employeur</h3>
+    <dl class="space-y-2 text-sm">
+      <div class="flex justify-between"><dt>CNSS employeur</dt><dd>{{ payslip.cnss_employer|floatformat:0 }}</dd></div>
+      <div class="flex justify-between"><dt>VPS ({{ settings.vps_rate|floatformat:"-2" }} %)</dt><dd>{{ payslip.vps|floatformat:0 }}</dd></div>
+      <div class="flex justify-between border-t pt-2 font-semibold"><dt>Coût total</dt><dd>{{ payslip.employer_cost|floatformat:0 }}</dd></div>
+    </dl>
+  </div>
+  <div class="card p-5"><h3 class="mb-3 font-medium">Primes et retenues du mois</h3>
+    <table class="w-full text-sm"><tbody>
+    {% for i in items %}<tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500"><td class="py-2">{{ i.label }}<p class="text-xs text-slate-400">{{ i.get_kind_display }}{% if not i.subject_to_contributions %} · non soumis{% endif %}</p></td>
+      <td class="py-2 text-right {% if i.kind == 'deduction' %}text-error{% endif %}">{{ i.amount|floatformat:0 }}</td>
+      <td class="py-2 text-right">{% if period.is_draft %}<form method="post" action="{% url 'payroll:item_delete' payslip.pk i.pk %}" class="inline">{% csrf_token %}<button class="text-error hover:underline">Retirer</button></form>{% endif %}</td></tr>
+    {% empty %}<tr><td class="py-6 text-center text-slate-400">Aucun élément variable.</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+</div>
+{% endblock %}
