@@ -66,12 +66,12 @@ SECTIONS = [
         "evaluations", "Évaluations", "star", STAFF,
         [
             ("Mes évaluations", "evaluations:mine", STAFF),
-            ("Toutes les évaluations", "evaluations:list", HR),
+            ("Évaluations de l'équipe", "evaluations:list", {"admin", "hr", "manager"}),
         ],
     ),
     (
-        "documents", "Documents", "folder", HR,
-        [("Documents RH", "documents:list", HR), ("Documents à renouveler", "documents:expiring", HR)],
+        "documents", "Documents", "folder", STAFF,
+        [("Documents RH", "documents:list", HR), ("Documents à renouveler", "documents:expiring", HR), ("Mes documents", "documents:mine", {"manager", "employee"})],
     ),
     (
         "settings", "Paramètres", "cog", HR,

@@ -3,7 +3,8 @@
 {% block content %}
 <div class="mb-4 flex items-center justify-between">
   <h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Employés</h2>
-  <a href="{% url 'employees:create' %}" class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">+ Nouvel employé</a>
+  <div class="flex gap-2"><a href="?q={{ q|urlencode }}&department={{ selected_department }}&status={{ selected_status }}&export=csv" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500">Exporter en CSV</a>
+  <a href="{% url 'employees:create' %}" class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">+ Nouvel employé</a></div>
 </div>
 
 <form method="get" class="card mb-4 flex-row flex-wrap gap-3 p-4">

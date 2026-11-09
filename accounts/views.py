@@ -71,6 +71,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         from leaves.models import LeaveRequest
 
         ctx["on_leave_employees"] = len(leave_services.employee_ids_on_leave(company, today))
+        from documents.models import expiring_documents
+
+        ctx["expiring_docs"] = expiring_documents(company).count()
         ctx["pending_leaves"] = LeaveRequest.objects.filter(company=company, status="pending").count()
         ctx["departments_count"] = Department.objects.filter(company=company).count()
         ctx["by_department"] = (

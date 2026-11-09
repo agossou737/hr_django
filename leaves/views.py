@@ -135,6 +135,18 @@ class LeaveListView(HRRequiredMixin, CompanyQuerysetMixin, ListView):
     context_object_name = "requests"
     paginate_by = 25
 
+    def get(self, request, *args, **kwargs):
+        if request.GET.get("export") == "csv":
+            from companies.exports import csv_response
+
+            rows = [
+                [r.employee.matricule, r.employee.full_name, r.leave_type.name, r.start_date, r.end_date, r.days,
+                 r.get_status_display(), r.created_at.date()]
+                for r in self.get_queryset()
+            ]
+            return csv_response("conges.csv", ["Matricule", "Employé", "Type", "Du", "Au", "Jours", "Statut", "Demandé le"], rows)
+        return super().get(request, *args, **kwargs)
+
     def get_queryset(self):
         qs = super().get_queryset().select_related("employee", "leave_type")
         status = self.request.GET.get("status")

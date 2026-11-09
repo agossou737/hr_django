@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ application.full_name }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+<div><a href="{% url 'recruitment:application_list' %}" class="text-sm text-slate-400 hover:text-primary dark:text-navy-300">← Candidatures</a><h2 class="mt-1 text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">{{ application.full_name }}</h2><p class="text-xs-plus text-slate-400">{{ application.job.title }} · {{ application.get_stage_display }}</p></div>
+<div class="flex gap-2"><a href="{% url 'recruitment:application_update' application.pk %}" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">Modifier</a><a href="{% url 'recruitment:application_delete' application.pk %}" class="btn border border-error/40 font-medium text-error hover:bg-error/10">Supprimer</a></div></div>
+<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+<div class="card p-5"><dl class="space-y-2 text-sm">
+<div class="flex justify-between"><dt class="text-slate-500">E-mail</dt><dd>{{ application.email|default:"—" }}</dd></div>
+<div class="flex justify-between"><dt class="text-slate-500">Téléphone</dt><dd>{{ application.phone|default:"—" }}</dd></div>
+<div class="flex justify-between"><dt class="text-slate-500">Note</dt><dd>{% if application.rating %}{{ application.rating }}/5{% else %}—{% endif %}</dd></div>
+<div class="flex justify-between"><dt class="text-slate-500">CV</dt><dd>{% if application.cv %}<a class="text-primary hover:underline dark:text-accent-light" href="{% url 'recruitment:application_cv' application.pk %}">Télécharger</a>{% else %}—{% endif %}</dd></div></dl>
+<h3 class="mb-1 mt-4 font-medium">Notes</h3><p class="whitespace-pre-line text-sm text-slate-500 dark:text-navy-200">{{ application.notes|default:"Aucune note." }}</p></div>
+<div class="card p-5">
+{% if application.employee_id %}<p class="text-sm">Candidat embauché : <a class="text-primary hover:underline dark:text-accent-light" href="{% url 'employees:detail' application.employee_id %}">voir la fiche employé</a></p>
+{% else %}
+<h3 class="mb-3 font-medium">Faire avancer la candidature</h3>
+<form method="post" action="{% url 'recruitment:application_stage' application.pk %}" class="flex gap-2">{% csrf_token %}
+<select name="stage" class="form-select rounded-lg border border-slate-300 bg-white px-3 py-2 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:bg-navy-700 dark:hover:border-navy-400 dark:focus:border-accent flex-1">{% for v, l in stages %}{% if v != 'hired' %}<option value="{{ v }}" {% if application.stage == v %}selected{% endif %}>{{ l }}</option>{% endif %}{% endfor %}</select><button class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">Changer</button></form>
+<h3 class="mb-3 mt-6 font-medium">Embaucher</h3>
+<form method="post" action="{% url 'recruitment:application_hire' application.pk %}" class="space-y-3">{% csrf_token %}
+<label class="block text-sm">Date d'embauche<input type="date" name="hire_date" class="form-input w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 dark:border-navy-450 mt-1"></label>
+<label class="block text-sm">Sexe<select name="gender" class="form-select rounded-lg border border-slate-300 bg-white px-3 py-2 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:bg-navy-700 dark:hover:border-navy-400 dark:focus:border-accent mt-1 w-full"><option value="M">Masculin</option><option value="F">Féminin</option></select></label>
+<button class="btn bg-success font-medium text-white hover:bg-success-focus focus:bg-success-focus active:bg-success-focus/90">Créer la fiche employé</button></form>
+{% endif %}</div></div>
+{% endblock %}

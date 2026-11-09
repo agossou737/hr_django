@@ -60,3 +60,6 @@ select.form-select { padding-right: 2.25rem; }
 .cal-chip{margin-top:.2rem;padding:.1rem .35rem;border-radius:.3rem;background:rgb(79 70 229 / .12);color:#4338ca;font-size:.7rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dark .cal-cell{border-color:#32404f}.dark .cal-off{background:#1f2937}.dark .cal-chip{color:#a5b4fc}
 .w-44{width:11rem}
+.whitespace-pre-line{white-space:pre-line}
+.mb-2{margin-bottom:.5rem}
+@media (min-width:1024px){.lg\:grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}}

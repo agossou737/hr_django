@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
+from companies.exports import csv_response
 from accounts.mixins import CompanyFormMixin, CompanyQuerysetMixin, HRRequiredMixin
 
 from .forms import ContractForm, DepartmentForm, EmployeeForm, PositionForm
@@ -34,6 +35,18 @@ class EmployeeListView(HRRequiredMixin, CompanyQuerysetMixin, ListView):
         if status in Employee.Status.values:
             qs = qs.filter(status=status)
         return qs
+
+    def get(self, request, *args, **kwargs):
+        if request.GET.get("export") == "csv":
+            rows = [
+                [e.matricule, e.last_name, e.first_name, e.get_gender_display(), e.birth_date, e.email, e.phone,
+                 e.department or "", e.position or "", e.hire_date, e.get_status_display(), e.cnss_number, e.ifu]
+                for e in self.get_queryset()
+            ]
+            header = ["Matricule", "Nom", "Prénoms", "Sexe", "Naissance", "E-mail", "Téléphone", "Département",
+                      "Poste", "Embauche", "Statut", "N° CNSS", "IFU"]
+            return csv_response("employes.csv", header, rows)
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

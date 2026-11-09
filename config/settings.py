@@ -26,6 +26,9 @@ INSTALLED_APPS = [
     "attendance",
     "leaves",
     "payroll",
+    "recruitment",
+    "evaluations",
+    "documents",
 ]
 
 MIDDLEWARE = [
@@ -109,6 +112,9 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+# Fichiers confidentiels (CV, documents RH) : jamais servis directement, uniquement via des vues protégées.
+PRIVATE_ROOT = BASE_DIR / "private"
+UPLOAD_MAX_MB = 5
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

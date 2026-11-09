@@ -48,6 +48,15 @@
 
 <div class="card mt-4 sm:mt-5 lg:mt-6">
   <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-4 sm:px-5">
+    <div><h3 class="font-medium tracking-wide text-slate-700 dark:text-navy-100">Documents</h3>
+      <p class="text-xs-plus text-slate-400 dark:text-navy-300">Pièces d'identité, diplômes, visites médicales…</p></div>
+    <div class="flex gap-2"><a href="{% url 'documents:list' %}?employee={{ employee.pk }}" class="text-primary hover:underline dark:text-accent-light">Voir ({{ employee.documents.count }})</a>
+    <a href="{% url 'documents:create' %}?employee={{ employee.pk }}" class="text-primary hover:underline dark:text-accent-light">+ Ajouter</a></div>
+  </div>
+</div>
+
+<div class="card mt-4 sm:mt-5 lg:mt-6">
+  <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-4 sm:px-5">
     <div>
       <h3 class="font-medium tracking-wide text-slate-700 dark:text-navy-100">Pointage facial</h3>
       <p class="text-xs-plus text-slate-400 dark:text-navy-300">{% if face_samples %}Visage enrôlé ({{ face_samples }} échantillon{{ face_samples|pluralize }}){% else %}Visage non enrôlé{% endif %}</p>

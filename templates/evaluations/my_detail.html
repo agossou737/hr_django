@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Mon évaluation{% endblock %}
+{% block content %}
+<div class="mb-4"><a href="{% url 'evaluations:mine' %}" class="text-sm text-slate-400 hover:text-primary">← Mes évaluations</a><h2 class="mt-1 text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Évaluation — {{ evaluation.period }}</h2></div>
+<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">{% include "evaluations/_body.html" %}</div>
+{% if evaluation.status == 'submitted' %}
+<form method="post" action="{% url 'evaluations:acknowledge' evaluation.pk %}" class="card mt-4 space-y-3 p-5">{% csrf_token %}
+<h3 class="font-medium">Votre retour</h3><textarea name="comment" rows="3" class="form-textarea w-full rounded-lg border border-slate-300 bg-transparent p-2.5 dark:border-navy-450" placeholder="Commentaire (facultatif)"></textarea>
+<button class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">J'ai pris connaissance de cette évaluation</button></form>{% endif %}
+{% endblock %}

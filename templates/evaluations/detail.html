@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Évaluation{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+<div><a href="{% url 'evaluations:list' %}" class="text-sm text-slate-400 hover:text-primary dark:text-navy-300">← Évaluations</a><h2 class="mt-1 text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">{{ evaluation.employee.full_name }} — {{ evaluation.period }}</h2><p class="text-xs-plus text-slate-400">{{ evaluation.date|date:"d/m/Y" }} · {{ evaluation.get_status_display }}</p></div>
+{% if evaluation.status == 'draft' %}<div class="flex gap-2"><a href="{% url 'evaluations:update' evaluation.pk %}" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">Modifier</a>
+<form method="post" action="{% url 'evaluations:submit' evaluation.pk %}" onsubmit="return confirm('Transmettre à l\'employé ? Elle ne sera plus modifiable.');">{% csrf_token %}<button class="btn bg-success font-medium text-white hover:bg-success-focus focus:bg-success-focus active:bg-success-focus/90">Transmettre à l'employé</button></form></div>{% endif %}</div>
+<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">{% include "evaluations/_body.html" %}</div>
+{% endblock %}

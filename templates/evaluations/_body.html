@@ -1,0 +1,11 @@
+<div class="card p-5">
+  <p class="text-sm text-slate-500">Moyenne générale</p><p class="text-3xl font-semibold text-primary dark:text-accent-light">{{ evaluation.average|default:"—" }} <span class="text-base font-normal text-slate-400">/ 5</span></p>
+  <table class="mt-4 w-full text-sm"><tbody>{% for label, score in evaluation.score_rows %}
+  <tr class="border-b border-slate-200 dark:border-navy-500"><td class="py-2">{{ label }}</td><td class="py-2 text-right font-medium">{{ score|default:"—" }} / 5</td></tr>{% endfor %}</tbody></table>
+</div>
+<div class="card p-5 space-y-4 text-sm">
+  <div><h3 class="font-medium">Points forts</h3><p class="whitespace-pre-line text-slate-500 dark:text-navy-200">{{ evaluation.strengths|default:"—" }}</p></div>
+  <div><h3 class="font-medium">Axes d'amélioration</h3><p class="whitespace-pre-line text-slate-500 dark:text-navy-200">{{ evaluation.improvements|default:"—" }}</p></div>
+  <div><h3 class="font-medium">Objectifs</h3><p class="whitespace-pre-line text-slate-500 dark:text-navy-200">{{ evaluation.objectives|default:"—" }}</p></div>
+  {% if evaluation.employee_comment %}<div><h3 class="font-medium">Commentaire de l'employé</h3><p class="whitespace-pre-line text-slate-500 dark:text-navy-200">{{ evaluation.employee_comment }}</p></div>{% endif %}
+</div>

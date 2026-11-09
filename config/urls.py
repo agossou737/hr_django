@@ -17,6 +17,9 @@ urlpatterns = [
     path("pointage/", include("attendance.urls")),
     path("conges/", include("leaves.urls")),
     path("paie/", include("payroll.urls")),
+    path("recrutement/", include("recruitment.urls")),
+    path("evaluations/", include("evaluations.urls")),
+    path("documents/", include("documents.urls")),
     path("parametres/", include("companies.urls")),
 ]
 

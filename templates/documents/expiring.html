@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Documents à renouveler{% endblock %}
+{% block content %}
+<div class="mb-4"><h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Documents à renouveler</h2><p class="text-xs-plus text-slate-400 dark:text-navy-300">Expirés ou arrivant à échéance dans les 60 jours</p></div>
+<div class="card"><div class="is-scrollbar-hidden min-w-full overflow-x-auto"><table class="w-full text-left">
+<thead><tr><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Employé</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Document</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Expiration</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Délai</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5"></th></tr></thead><tbody>
+{% for d in documents %}<tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500"><td class="whitespace-nowrap px-4 py-3 sm:px-5 font-medium">{{ d.employee.full_name }}</td><td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ d.title }}</td><td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ d.expiry_date|date:"d/m/Y" }}</td>
+<td class="whitespace-nowrap px-4 py-3 sm:px-5">{% if d.expiry_state == 'expired' %}<span class="text-error font-medium">Expiré depuis {{ d.days_left|cut:"-" }} j</span>{% else %}<span class="text-warning font-medium">Dans {{ d.days_left }} j</span>{% endif %}</td>
+<td class="whitespace-nowrap px-4 py-3 sm:px-5 text-right"><a class="text-primary hover:underline dark:text-accent-light" href="{% url 'documents:update' d.pk %}">Mettre à jour</a></td></tr>
+{% empty %}<tr><td colspan="5" class="px-5 py-10 text-center text-slate-400">Aucun document à renouveler.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}
