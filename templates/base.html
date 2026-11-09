@@ -12,12 +12,12 @@
       </div>
 
       <div class="is-scrollbar-hidden flex grow flex-col space-y-4 overflow-y-auto pt-6">
-        {% for item in nav_items %}
-        <a href="{{ item.url }}"
-           class="flex size-11 items-center justify-center rounded-lg outline-hidden transition-colors duration-200 {% if item.key == nav_section %}bg-primary/10 text-primary hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-navy-600 dark:text-accent-light dark:hover:bg-navy-450 dark:focus:bg-navy-450 dark:active:bg-navy-450/90{% else %}text-slate-500 hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:text-navy-200 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25{% endif %}"
-           x-tooltip.placement.right="'{{ item.label }}'">
+        {% for section in nav_sections %}
+        <a href="{{ section.url }}"
+           class="flex size-11 items-center justify-center rounded-lg outline-hidden transition-colors duration-200 {% if section.active %}bg-primary/10 text-primary hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-navy-600 dark:text-accent-light dark:hover:bg-navy-450 dark:focus:bg-navy-450 dark:active:bg-navy-450/90{% else %}text-slate-500 hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:text-navy-200 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25{% endif %}"
+           x-tooltip.placement.right="'{{ section.label }}'">
           <svg class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="{{ item.icon }}" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="{{ section.icon }}" />
           </svg>
         </a>
         {% endfor %}
@@ -84,13 +84,16 @@
       </div>
       <div class="h-[calc(100%-4.5rem)] overflow-x-hidden pb-6" x-init="$el._x_simplebar = new SimpleBar($el);">
         {% if company %}<p class="px-4 pb-2 text-xs uppercase tracking-wide text-slate-400 dark:text-navy-300">{{ company }}</p>{% endif %}
-        <ul class="flex flex-1 flex-col px-4 font-inter">
-          {% for item in nav_items %}
+        {% for section in nav_sections %}
+        <p class="px-4 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide {% if section.active %}text-primary dark:text-accent-light{% else %}text-slate-400 dark:text-navy-300{% endif %}">{{ section.label }}</p>
+        <ul class="flex flex-col px-4 font-inter">
+          {% for item in section.items %}
           <li>
-            <a href="{{ item.url }}" class="flex py-2 text-xs-plus tracking-wide outline-hidden transition-colors duration-300 ease-in-out {% if item.key == nav_section %}font-medium text-primary dark:text-accent-light{% else %}text-slate-600 hover:text-slate-900 dark:text-navy-200 dark:hover:text-navy-50{% endif %}">{{ item.label }}</a>
+            <a href="{{ item.url }}" class="flex py-1.5 text-xs-plus tracking-wide outline-hidden transition-colors duration-300 ease-in-out {% if item.active %}font-medium text-primary dark:text-accent-light{% else %}text-slate-600 hover:text-slate-900 dark:text-navy-200 dark:hover:text-navy-50{% endif %}">{{ item.label }}</a>
           </li>
           {% endfor %}
         </ul>
+        {% endfor %}
         <div class="my-3 mx-4 h-px bg-slate-200 dark:bg-navy-500"></div>
         <p class="px-4 text-xs text-slate-400 dark:text-navy-300">{{ APP_TAGLINE }}</p>
       </div>

@@ -34,6 +34,7 @@ class User(AbstractUser):
         HR = "hr", "Responsable RH"
         MANAGER = "manager", "Manager"
         EMPLOYEE = "employee", "Employé"
+        KIOSK = "kiosk", "Borne de pointage"
 
     username = None
     email = models.EmailField("E-mail", unique=True)
@@ -62,3 +63,7 @@ class User(AbstractUser):
     @property
     def can_manage_hr(self):
         return self.role in (self.Role.ADMIN, self.Role.HR)
+
+    @property
+    def is_kiosk(self):
+        return self.role == self.Role.KIOSK

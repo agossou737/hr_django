@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Rapport mensuel{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <div>
+    <h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Rapport mensuel de présence</h2>
+    <p class="text-xs-plus text-slate-400 dark:text-navy-300">{{ month_name }} {{ year }} · {{ working_days }} jour{{ working_days|pluralize }} ouvré{{ working_days|pluralize }} écoulé{{ working_days|pluralize }}</p>
+  </div>
+  <a href="?month={{ month }}&year={{ year }}&department={{ selected_department }}&export=csv" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">Exporter en CSV</a>
+</div>
+<form method="get" class="card mb-4 flex-row flex-wrap gap-3 p-4">
+  <select name="month" class="form-select rounded-lg border border-slate-300 bg-white px-3 py-2 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:bg-navy-700 dark:hover:border-navy-400 dark:focus:border-accent">{% for num, name in months %}<option value="{{ num }}" {% if num == month %}selected{% endif %}>{{ name }}</option>{% endfor %}</select>
+  <select name="year" class="form-select rounded-lg border border-slate-300 bg-white px-3 py-2 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:bg-navy-700 dark:hover:border-navy-400 dark:focus:border-accent">{% for y in years %}<option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select>
+  <select name="department" class="form-select rounded-lg border border-slate-300 bg-white px-3 py-2 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:bg-navy-700 dark:hover:border-navy-400 dark:focus:border-accent">
+    <option value="">Tous les départements</option>
+    {% for d in departments %}<option value="{{ d.pk }}" {% if selected_department == d.pk|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+  </select>
+  <button class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">Afficher</button>
+</form>
+<div class="card">
+  <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
+    <table class="is-hoverable w-full text-left">
+      <thead><tr>
+        <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Employé</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Département</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Présent</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Retards</th>
+        <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Min. de retard</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Heures</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Congés</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Absences</th>
+      </tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5"><a href="{% url 'employees:detail' r.employee.pk %}" class="font-medium text-slate-700 hover:text-primary dark:text-navy-100 dark:hover:text-accent-light">{{ r.employee.full_name }}</a></td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ r.employee.department|default:"—" }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ r.present }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ r.late }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ r.late_minutes }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ r.hours }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ r.leave }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5 {% if r.absences %}font-semibold text-error{% endif %}">{{ r.absences }}</td>
+        </tr>
+        {% empty %}<tr><td colspan="8" class="px-5 py-10 text-center text-slate-400 dark:text-navy-300">Aucune donnée.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

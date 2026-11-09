@@ -3,6 +3,8 @@ from datetime import date, timedelta
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.db.models import Count
+from django.shortcuts import redirect
+from django.urls import reverse
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from django.views.generic import TemplateView
@@ -14,6 +16,12 @@ class UserLoginView(LoginView):
     template_name = "accounts/login.html"
     redirect_authenticated_user = True
 
+    def get_default_redirect_url(self):
+        user = self.request.user
+        if user.is_authenticated and user.is_kiosk:
+            return reverse("attendance:kiosk")
+        return super().get_default_redirect_url()
+
 
 class UserLogoutView(LogoutView):
     pass
@@ -21,6 +29,11 @@ class UserLogoutView(LogoutView):
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.is_kiosk:
+            return redirect("attendance:kiosk")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

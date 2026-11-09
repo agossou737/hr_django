@@ -47,6 +47,16 @@
 </div>
 
 <div class="card mt-4 sm:mt-5 lg:mt-6">
+  <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-4 sm:px-5">
+    <div>
+      <h3 class="font-medium tracking-wide text-slate-700 dark:text-navy-100">Pointage facial</h3>
+      <p class="text-xs-plus text-slate-400 dark:text-navy-300">{% if face_samples %}Visage enrôlé ({{ face_samples }} échantillon{{ face_samples|pluralize }}){% else %}Visage non enrôlé{% endif %}</p>
+    </div>
+    <a href="{% url 'attendance:enroll' employee.pk %}" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">{% if face_samples %}Ré-enrôler le visage{% else %}Enrôler le visage{% endif %}</a>
+  </div>
+</div>
+
+<div class="card mt-4 sm:mt-5 lg:mt-6">
   <div class="flex items-center justify-between px-4 py-4 sm:px-5">
     <h3 class="font-medium tracking-wide text-slate-700 dark:text-navy-100">Contrats</h3>
     <a href="{% url 'employees:contract_create' employee.pk %}" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">+ Ajouter un contrat</a>

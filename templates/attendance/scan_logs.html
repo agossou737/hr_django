@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Journal des scans{% endblock %}
+{% block content %}
+<div class="mb-4"><h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Journal des scans</h2><p class="text-xs-plus text-slate-400 dark:text-navy-300">Toutes les tentatives de pointage, réussies ou non.</p></div>
+<form method="get" class="card mb-4 flex-row flex-wrap gap-3 p-4">
+  <select name="outcome" class="form-select rounded-lg border border-slate-300 bg-white px-3 py-2 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:bg-navy-700 dark:hover:border-navy-400 dark:focus:border-accent">
+    <option value="">Tous les résultats</option>
+    {% for value, label in outcomes %}<option value="{{ value }}" {% if selected_outcome == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select>
+  <button class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">Filtrer</button>
+</form>
+<div class="card">
+  <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
+    <table class="is-hoverable w-full text-left">
+      <thead><tr><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Date et heure</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Résultat</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Employé</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Distance</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Borne</th></tr></thead>
+      <tbody>
+        {% for log in logs %}
+        <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ log.created_at|date:"d/m/Y H:i:s" }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5"><span class="rounded-full px-2.5 py-1 text-xs font-medium {% if log.outcome == 'in' or log.outcome == 'out' %}bg-success/10 text-success{% elif log.outcome == 'duplicate' %}bg-warning/10 text-warning{% else %}bg-error/10 text-error{% endif %}">{{ log.get_outcome_display }}</span></td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ log.employee.full_name|default:"—" }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{% if log.distance is not None %}{{ log.distance|floatformat:3 }}{% else %}—{% endif %}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5 text-slate-400">{{ log.device|default:"—" }}</td>
+        </tr>
+        {% empty %}<tr><td colspan="5" class="px-5 py-10 text-center text-slate-400 dark:text-navy-300">Aucune tentative enregistrée.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% if is_paginated %}
+<div class="mt-4 flex items-center justify-between text-sm">
+  <span class="text-slate-500 dark:text-navy-200">Page {{ page_obj.number }} / {{ paginator.num_pages }}</span>
+  <div class="flex space-x-2">
+    {% if page_obj.has_previous %}<a class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90" href="?outcome={{ selected_outcome }}&page={{ page_obj.previous_page_number }}">Précédent</a>{% endif %}
+    {% if page_obj.has_next %}<a class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90" href="?outcome={{ selected_outcome }}&page={{ page_obj.next_page_number }}">Suivant</a>{% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

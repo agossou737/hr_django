@@ -23,3 +23,15 @@ class CompanyFormMixin:
         kwargs = super().get_form_kwargs()
         kwargs["company"] = self.request.user.company
         return kwargs
+
+
+class KioskRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    """Accès à la borne de pointage : compte « borne », Responsable RH ou Administrateur."""
+
+    def test_func(self):
+        user = self.request.user
+        return (
+            user.is_authenticated
+            and user.company_id is not None
+            and user.role in (user.Role.KIOSK, user.Role.HR, user.Role.ADMIN)
+        )

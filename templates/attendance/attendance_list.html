@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Présences{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <div>
+    <h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Présences</h2>
+    <p class="text-xs-plus capitalize text-slate-400 dark:text-navy-300">{{ day|date:"l j F Y" }}</p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'attendance:create' %}" class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">+ Saisir un pointage</a>
+    <a href="{% url 'attendance:monthly' %}" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">Rapport mensuel</a>
+  </div>
+</div>
+
+<div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-4">
+  <div class="card p-4"><p class="text-xs-plus uppercase text-slate-400 dark:text-navy-300">Présents</p><p class="mt-1 text-2xl font-semibold text-success">{{ summary.present }}</p></div>
+  <div class="card p-4"><p class="text-xs-plus uppercase text-slate-400 dark:text-navy-300">En retard</p><p class="mt-1 text-2xl font-semibold text-warning">{{ summary.late }}</p></div>
+  <div class="card p-4"><p class="text-xs-plus uppercase text-slate-400 dark:text-navy-300">Absents</p><p class="mt-1 text-2xl font-semibold text-error">{{ summary.absent }}</p></div>
+  <div class="card p-4"><p class="text-xs-plus uppercase text-slate-400 dark:text-navy-300">En congé</p><p class="mt-1 text-2xl font-semibold text-info">{{ summary.leave }}</p></div>
+</div>
+
+<form method="get" class="card mt-4 flex-row flex-wrap items-center gap-3 p-4">
+  <a href="?date={{ prev_day|date:'Y-m-d' }}" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">←</a>
+  <input type="date" name="date" value="{{ day|date:'Y-m-d' }}" class="form-input rounded-lg border border-slate-300 bg-transparent px-3 py-2 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:hover:border-navy-400 dark:focus:border-accent" onchange="this.form.submit()">
+  <a href="?date={{ next_day|date:'Y-m-d' }}" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">→</a>
+  <select name="department" class="form-select rounded-lg border border-slate-300 bg-white px-3 py-2 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:bg-navy-700 dark:hover:border-navy-400 dark:focus:border-accent">
+    <option value="">Tous les départements</option>
+    {% for d in departments %}<option value="{{ d.pk }}" {% if selected_department == d.pk|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+  </select>
+  <select name="status" class="form-select rounded-lg border border-slate-300 bg-white px-3 py-2 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:bg-navy-700 dark:hover:border-navy-400 dark:focus:border-accent">
+    <option value="">Tous les statuts</option>
+    {% for key, label in status_labels.items %}<option value="{{ key }}" {% if selected_status == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select>
+  <button class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">Filtrer</button>
+</form>
+
+<div class="card mt-4">
+  <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
+    <table class="is-hoverable w-full text-left">
+      <thead><tr>
+        <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Employé</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Département</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Statut</th>
+        <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Arrivée</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Départ</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Heures</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Source</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5"></th>
+      </tr></thead>
+      <tbody>
+        {% for row in rows %}
+        <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5"><a href="{% url 'employees:detail' row.employee.pk %}" class="font-medium text-slate-700 hover:text-primary dark:text-navy-100 dark:hover:text-accent-light">{{ row.employee.full_name }}</a><p class="text-xs text-slate-400">{{ row.employee.matricule }}</p></td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ row.employee.department|default:"—" }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5"><span class="rounded-full px-2.5 py-1 text-xs font-medium {% if row.status == 'present' %}bg-success/10 text-success{% elif row.status == 'late' %}bg-warning/10 text-warning{% elif row.status == 'absent' %}bg-error/10 text-error{% elif row.status == 'leave' %}bg-info/10 text-info{% else %}bg-slate-150 text-slate-500 dark:bg-navy-500 dark:text-navy-200{% endif %}">{{ row.label }}</span>{% if row.record.late_minutes %} <span class="text-xs text-warning">+{{ row.record.late_minutes }} min</span>{% endif %}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{% if row.record %}{{ row.record.check_in|time:"H:i" }}{% else %}—{% endif %}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{% if row.record.check_out %}{{ row.record.check_out|time:"H:i" }}{% else %}—{% endif %}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{% if row.record.worked_hours %}{{ row.record.worked_hours }} h{% else %}—{% endif %}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5 text-xs text-slate-400">{% if row.record %}{{ row.record.get_source_in_display }}{% endif %}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5 text-right">
+            {% if row.record %}
+            <a class="text-primary hover:underline dark:text-accent-light" href="{% url 'attendance:update' row.record.pk %}">Corriger</a>
+            <span class="px-1 text-slate-300">·</span>
+            <a class="text-error hover:underline" href="{% url 'attendance:delete' row.record.pk %}">Supprimer</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}<tr><td colspan="8" class="px-5 py-10 text-center text-slate-400 dark:text-navy-300">Aucun employé à afficher.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

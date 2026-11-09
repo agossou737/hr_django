@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "companies",
     "accounts",
     "employees",
+    "attendance",
 ]
 
 MIDDLEWARE = [
@@ -78,6 +79,13 @@ else:
 # Identité du produit (modifiable ici : nom affiché partout dans l'interface)
 APP_NAME = config("APP_NAME", default="Ruche RH")
 APP_TAGLINE = config("APP_TAGLINE", default="Gestion RH & pointage facial")
+
+# Pointage facial
+# Distance euclidienne maximale entre deux empreintes pour accepter une reconnaissance
+# (plus petit = plus strict ; 0.6 est la valeur usuelle de face-api.js).
+FACE_MATCH_THRESHOLD = config("FACE_MATCH_THRESHOLD", default=0.5, cast=float)
+# Délai minimal entre deux pointages d'un même employé (évite les doubles passages)
+ATTENDANCE_MIN_INTERVAL_MINUTES = config("ATTENDANCE_MIN_INTERVAL_MINUTES", default=2, cast=int)
 
 AUTH_USER_MODEL = "accounts.User"
 

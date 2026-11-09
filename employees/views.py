@@ -56,6 +56,11 @@ class EmployeeDetailView(HRRequiredMixin, CompanyQuerysetMixin, DetailView):
     def get_queryset(self):
         return super().get_queryset().select_related("department", "position", "manager")
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["face_samples"] = self.object.face_templates.count()
+        return ctx
+
 
 class EmployeeCreateView(HRRequiredMixin, CompanyFormMixin, CreateView):
     model = Employee
