@@ -5,8 +5,8 @@ from django.urls import include, path
 
 from accounts.views import DashboardView
 
-admin.site.site_header = "JEV — Administration"
-admin.site.site_title = "JEV"
+admin.site.site_header = "Ruche RH — Administration"
+admin.site.site_title = "Ruche RH"
 admin.site.index_title = "Administration de la plateforme"
 
 urlpatterns = [
@@ -15,6 +15,8 @@ urlpatterns = [
     path("compte/", include("accounts.urls")),
     path("employes/", include("employees.urls")),
     path("pointage/", include("attendance.urls")),
+    path("conges/", include("leaves.urls")),
+    path("parametres/", include("companies.urls")),
 ]
 
 if settings.DEBUG:

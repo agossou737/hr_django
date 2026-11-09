@@ -30,10 +30,29 @@ class UserLogoutView(LogoutView):
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard.html"
 
+    def get_template_names(self):
+        user = self.request.user
+        if user.company_id and not user.can_manage_hr:
+            return ["dashboard_self.html"]
+        return [self.template_name]
+
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated and request.user.is_kiosk:
             return redirect("attendance:kiosk")
         return super().dispatch(request, *args, **kwargs)
+
+    def _self_context(self, ctx, company, today):
+        from leaves import services as leave_services
+
+        user = self.request.user
+        employee = Employee.objects.filter(company=company, user=user).first()
+        ctx["employee"] = employee
+        if employee:
+            ctx["balances"] = [b for b in leave_services.balances(employee) if b["allowed"] or b["used"]]
+            ctx["my_requests"] = employee.leave_requests.select_related("leave_type")[:5]
+            ctx["today_record"] = employee.attendance_records.filter(date=today).first()
+        ctx["to_review"] = leave_services.reviewable_requests(user).count() if user.role == "manager" else 0
+        return ctx
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -44,9 +63,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         employees = Employee.objects.filter(company=company)
         today = timezone.localdate()
+        if not self.request.user.can_manage_hr:
+            return self._self_context(ctx, company, today)
         ctx["total_employees"] = employees.count()
         ctx["active_employees"] = employees.filter(status=Employee.Status.ACTIVE).count()
-        ctx["on_leave_employees"] = employees.filter(status=Employee.Status.ON_LEAVE).count()
+        from leaves import services as leave_services
+        from leaves.models import LeaveRequest
+
+        ctx["on_leave_employees"] = len(leave_services.employee_ids_on_leave(company, today))
+        ctx["pending_leaves"] = LeaveRequest.objects.filter(company=company, status="pending").count()
         ctx["departments_count"] = Department.objects.filter(company=company).count()
         ctx["by_department"] = (
             employees.exclude(status=Employee.Status.LEFT)
@@ -97,3 +122,99 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             end_date__lte=today + timedelta(days=60),
         ).select_related("employee").order_by("end_date")
         return ctx
+
+
+# ------------------------------------------------------- Gestion des utilisateurs
+from django.contrib import messages  # noqa: E402
+from django.core.exceptions import PermissionDenied  # noqa: E402
+from django.shortcuts import get_object_or_404  # noqa: E402
+from django.urls import reverse_lazy  # noqa: E402
+from django.views.generic import FormView, ListView  # noqa: E402
+
+from .forms import PasswordResetForm, UserCreateForm, UserUpdateForm  # noqa: E402
+from .mixins import HRRequiredMixin  # noqa: E402
+from .models import User  # noqa: E402
+
+
+class CompanyUsersMixin(HRRequiredMixin):
+    def get_company_users(self):
+        return User.objects.filter(company=self.request.user.company)
+
+    def get_target(self, pk):
+        target = get_object_or_404(self.get_company_users(), pk=pk)
+        if target.role == User.Role.ADMIN and self.request.user.role != User.Role.ADMIN:
+            raise PermissionDenied  # un RH ne modifie pas un administrateur
+        return target
+
+
+class UserListView(CompanyUsersMixin, ListView):
+    template_name = "accounts/user_list.html"
+    context_object_name = "users_list"
+
+    def get_queryset(self):
+        return self.get_company_users().select_related("employee").order_by("last_name", "email")
+
+
+class UserCreateView(CompanyUsersMixin, FormView):
+    form_class = UserCreateForm
+    template_name = "form_page.html"
+    success_url = reverse_lazy("accounts:user_list")
+    extra_context = {"title": "Nouvel utilisateur", "cancel_url": reverse_lazy("accounts:user_list")}
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update(company=self.request.user.company, acting_user=self.request.user)
+        return kwargs
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, "Utilisateur créé.")
+        return super().form_valid(form)
+
+
+class UserUpdateView(CompanyUsersMixin, FormView):
+    form_class = UserUpdateForm
+    template_name = "form_page.html"
+    success_url = reverse_lazy("accounts:user_list")
+    extra_context = {"title": "Modifier l'utilisateur", "cancel_url": reverse_lazy("accounts:user_list")}
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.company_id and request.user.can_manage_hr:
+            self.target = self.get_target(kwargs["pk"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update(company=self.request.user.company, acting_user=self.request.user, instance=self.target)
+        return kwargs
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, "Utilisateur mis à jour.")
+        return super().form_valid(form)
+
+
+class UserPasswordView(CompanyUsersMixin, FormView):
+    form_class = PasswordResetForm
+    template_name = "form_page.html"
+    success_url = reverse_lazy("accounts:user_list")
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.company_id and request.user.can_manage_hr:
+            self.target = self.get_target(kwargs["pk"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx.update(title=f"Nouveau mot de passe — {self.target}", cancel_url=self.success_url)
+        return ctx
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.target
+        return kwargs
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, "Mot de passe modifié.")
+        return super().form_valid(form)

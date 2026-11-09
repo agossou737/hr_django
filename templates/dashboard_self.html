@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Mon espace{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Bonjour {{ user.first_name|default:user.email }}</h2>
+  <p class="text-xs-plus text-slate-400 dark:text-navy-300">{{ company }} · Mon espace</p>
+</div>
+{% if not employee %}
+<div class="card p-5 text-sm text-warning">Votre compte n'est lié à aucune fiche employé. Demandez aux RH de faire le rattachement.</div>
+{% else %}
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="card p-4"><p class="text-xs-plus uppercase text-slate-400 dark:text-navy-300">Pointage du jour</p>
+    <p class="mt-1 text-lg font-semibold text-slate-700 dark:text-navy-100">{% if today_record %}Arrivée {{ today_record.check_in|time:"H:i" }}{% if today_record.check_out %} · Départ {{ today_record.check_out|time:"H:i" }}{% endif %}{% else %}Pas encore pointé{% endif %}</p></div>
+  {% for b in balances %}
+  <div class="card p-4"><p class="text-xs-plus uppercase text-slate-400 dark:text-navy-300">{{ b.type.name }}</p>
+    {% if b.remaining is not None %}<p class="mt-1 text-2xl font-semibold text-slate-700 dark:text-navy-100">{{ b.remaining|floatformat:"-1" }} <span class="text-sm font-normal text-slate-400">/ {{ b.allowed|floatformat:"-1" }} j</span></p>
+    {% else %}<p class="mt-1 text-2xl font-semibold text-slate-700 dark:text-navy-100">{{ b.used|floatformat:"-1" }} <span class="text-sm font-normal text-slate-400">j pris</span></p>{% endif %}</div>
+  {% endfor %}
+  {% if to_review %}<a href="{% url 'leaves:pending' %}" class="card p-4"><p class="text-xs-plus uppercase text-slate-400">À valider</p><p class="mt-1 text-2xl font-semibold text-warning">{{ to_review }}</p></a>{% endif %}
+</div>
+<div class="card mt-4">
+  <div class="flex items-center justify-between px-4 py-4"><h3 class="font-medium text-slate-700 dark:text-navy-100">Mes dernières demandes</h3>
+    <a href="{% url 'leaves:create' %}" class="text-primary hover:underline dark:text-accent-light">+ Nouvelle demande</a></div>
+  <div class="min-w-full overflow-x-auto"><table class="w-full text-left text-sm"><tbody>
+  {% for r in my_requests %}<tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500"><td class="px-4 py-3">{{ r.leave_type }}</td><td class="px-4 py-3">{{ r.start_date|date:"d/m/Y" }} → {{ r.end_date|date:"d/m/Y" }}</td><td class="px-4 py-3">{{ r.get_status_display }}</td></tr>
+  {% empty %}<tr><td class="px-4 py-6 text-center text-slate-400">Aucune demande.</td></tr>{% endfor %}
+  </tbody></table></div>
+</div>
+{% endif %}
+{% endblock %}

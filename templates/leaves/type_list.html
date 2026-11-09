@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Types de congés{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <div><h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Types de congés</h2><p class="text-xs-plus text-slate-400 dark:text-navy-300">Droits annuels à confirmer selon votre convention collective et le Code du travail.</p></div>
+  <div class="flex gap-2">
+    <form method="post" action="{% url 'leaves:type_defaults' %}">{% csrf_token %}<button class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">Ajouter les types usuels</button></form>
+    <a href="{% url 'leaves:type_create' %}" class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">+ Nouveau type</a>
+  </div>
+</div>
+<div class="card"><div class="is-scrollbar-hidden min-w-full overflow-x-auto"><table class="w-full text-left">
+  <thead><tr><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Libellé</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Droit annuel</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Rémunéré</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Validation</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5"></th></tr></thead>
+  <tbody>
+  {% for t in types %}<tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
+    <td class="whitespace-nowrap px-4 py-3 sm:px-5 font-medium">{{ t.name }}</td>
+    <td class="whitespace-nowrap px-4 py-3 sm:px-5">{% if t.is_capped %}{{ t.annual_days|floatformat:"-1" }} j{% else %}Non plafonné{% endif %}</td>
+    <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ t.is_paid|yesno:"Oui,Non" }}</td>
+    <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ t.needs_approval|yesno:"Requise,Automatique" }}</td>
+    <td class="whitespace-nowrap px-4 py-3 sm:px-5 text-right"><a class="text-primary hover:underline dark:text-accent-light" href="{% url 'leaves:type_update' t.pk %}">Modifier</a> <span class="px-1 text-slate-300">·</span> <a class="text-error hover:underline" href="{% url 'leaves:type_delete' t.pk %}">Supprimer</a></td>
+  </tr>{% empty %}<tr><td colspan="5" class="px-5 py-10 text-center text-slate-400">Aucun type de congé. Cliquez sur « Ajouter les types usuels ».</td></tr>{% endfor %}
+  </tbody></table></div></div>
+{% endblock %}

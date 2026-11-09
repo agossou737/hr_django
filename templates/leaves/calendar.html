@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Calendrier des congés{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Calendrier — {{ month_name }} {{ year }}</h2>
+  <div class="flex gap-2">
+    <a class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90" href="?year={{ prev.0 }}&month={{ prev.1 }}">←</a>
+    <a class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90" href="{% url 'leaves:calendar' %}">Aujourd'hui</a>
+    <a class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90" href="?year={{ next.0 }}&month={{ next.1 }}">→</a>
+  </div>
+</div>
+<div class="card overflow-hidden">
+  <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-200 text-center text-xs font-semibold uppercase text-slate-700 dark:border-navy-500 dark:bg-navy-800 dark:text-navy-100">
+    {% for d in weekdays %}<div class="py-2">{{ d }}</div>{% endfor %}
+  </div>
+  {% for week in weeks %}
+  <div class="grid grid-cols-7">
+    {% for c in week %}
+    <div class="cal-cell {% if not c.in_month %}cal-out{% endif %} {% if c.off or c.holiday %}cal-off{% endif %} {% if c.today %}cal-today{% endif %}">
+      <div class="text-xs {% if c.holiday %}font-semibold text-error{% else %}text-slate-400{% endif %}">{{ c.date.day }}{% if c.holiday %} · férié{% endif %}</div>
+      {% for l in c.leaves|slice:":3" %}<div class="cal-chip" title="{{ l.employee.full_name }} — {{ l.leave_type }}">{{ l.employee.first_name }} {{ l.employee.last_name|slice:":1" }}.</div>{% endfor %}
+      {% if c.leaves|length > 3 %}<div class="text-xs text-slate-400">+{{ c.leaves|length|add:"-3" }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

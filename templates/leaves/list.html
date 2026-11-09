@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Toutes les demandes{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+  <h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Toutes les demandes de congé</h2>
+  <a href="{% url 'leaves:hr_create' %}" class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">+ Saisir un congé</a>
+</div>
+<form method="get" class="card mb-4 flex-row flex-wrap gap-3 p-4">
+  <select name="status" class="form-select rounded-lg border border-slate-300 bg-white px-3 py-2 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:bg-navy-700 dark:hover:border-navy-400 dark:focus:border-accent"><option value="">Tous les statuts</option>
+    {% for v, l in statuses %}<option value="{{ v }}" {% if selected_status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+  <button class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">Filtrer</button>
+</form>
+<div class="card">
+  <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
+    <table class="is-hoverable w-full text-left">
+      <thead><tr><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Employé</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Type</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Période</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Jours</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Statut</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Demandé le</th></tr></thead>
+      <tbody>
+        {% for r in requests %}
+        <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5 font-medium">{{ r.employee.full_name }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ r.leave_type }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ r.start_date|date:"d/m/Y" }} → {{ r.end_date|date:"d/m/Y" }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ r.days|floatformat:"-1" }}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5">{% include "leaves/_status_badge.html" %}</td>
+          <td class="whitespace-nowrap px-4 py-3 sm:px-5 text-slate-400">{{ r.created_at|date:"d/m/Y" }}</td>
+        </tr>
+        {% empty %}<tr><td colspan="6" class="px-5 py-10 text-center text-slate-400 dark:text-navy-300">Aucune demande.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% if is_paginated %}<div class="mt-4 flex items-center justify-between text-sm"><span>Page {{ page_obj.number }} / {{ paginator.num_pages }}</span><div class="flex space-x-2">
+{% if page_obj.has_previous %}<a class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90" href="?status={{ selected_status }}&page={{ page_obj.previous_page_number }}">Précédent</a>{% endif %}
+{% if page_obj.has_next %}<a class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90" href="?status={{ selected_status }}&page={{ page_obj.next_page_number }}">Suivant</a>{% endif %}</div></div>{% endif %}
+{% endblock %}
