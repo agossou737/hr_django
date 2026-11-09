@@ -78,3 +78,18 @@ standard ; adaptable à un terminal ZKTeco via `pyzk`).
 ## Limites à connaître
 * Le lecteur USB doit être raccordé à un PC allumé et connecté (ou un terminal réseau) qui exécute l'agent.
 * L'empreinte WebAuthn dépend du matériel de l'appareil (capteur ou reconnaissance faciale du téléphone).
+
+# Modules RH complémentaires (étape 10)
+
+## Notes de frais
+Employé : objet, catégorie, date, montant, justificatif (PDF/image, stocké en privé). Validation par le manager
+(ou son remplaçant délégué) ou les RH ; jamais par soi-même. Les RH marquent la note « remboursée ». Fiche PDF, export Excel/PDF/CSV.
+
+## Formations
+Catalogue (organisme, dates, lieu, coût), inscription groupée d'employés (notification), suivi du statut
+(inscrit / suivie / absent) et **attestation de formation PDF** pour les formations suivies. Export des participants.
+
+## Discipline
+Réservé aux RH (les managers n'y ont pas accès) : avertissement verbal/écrit, blâme, mise à pied, autre mesure,
+rattachable à une demande d'explication. L'employé est notifié, consulte le **PDF de notification** et
+**confirme sa prise de connaissance** (horodatée). Export de la liste.

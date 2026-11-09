@@ -147,6 +147,9 @@ def _reviewable(user, model):
     return qs.filter(Q(employee__manager__in=ids) | Q(employee__department__head__in=ids))
 
 
+reviewable = _reviewable  # utilisable par d'autres modules (notes de frais…)
+
+
 def reviewable_requests(user):
     """Demandes de congé en attente que l'utilisateur peut traiter."""
     return _reviewable(user, LeaveRequest).select_related("leave_type", "replacement")

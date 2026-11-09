@@ -10,7 +10,14 @@ documents RH.
 |---|---|
 | **Employés** | Fiches (matricule auto, CNSS, IFU), départements, postes, contrats, export CSV |
 | **Pointage facial** | Borne dans le navigateur (face-api.js, hors ligne), enrôlement avec consentement, arrivée/départ, retards, journal des scans, présences du jour, rapport mensuel |
-| **Congés** | Types, demandes, soldes, chevauchements, validation manager/RH, calendrier, intégration au pointage |
+| **Pointage par empreinte** | Biométrie du téléphone/PC (WebAuthn, aucune donnée biométrique stockée) et lecteurs USB via API |
+| **Congés et permissions** | Types, demandes, soldes, chevauchements, **remplaçant (intérim) à confirmer et délégation**, permissions de quelques heures, validation manager/RH, calendrier, autorisations PDF |
+| **Explications de retard** | Demande automatique dès qu'un retard est détecté, PDF à l'employé, réponse en ligne, PDF de réponse aux RH, décision, relances |
+| **Notifications** | Cloche dans l'application + e-mails |
+| **Matériel** | Inventaire, affectation, restitution, décharge PDF |
+| **Réunions** | Convocations, comptes rendus PDF, actions suivies |
+| **Notes de frais, formations, discipline** | Circuits de validation, attestations et notifications PDF |
+| **Exports et imports** | Excel / PDF / CSV partout ; import massif des employés avec aperçu |
 | **Paie Bénin** | CNSS, ITS (barème progressif), VPS, congés non payés, primes/retenues, périodes validables, **bulletins PDF**, journal Excel/CSV, état CNSS |
 | **Recrutement** | Offres, candidatures par étapes, CV privé, embauche en un clic |
 | **Évaluations** | Grille de critères, brouillon → transmission → prise en compte par l'employé |
@@ -40,7 +47,7 @@ Nouveau client : `python manage.py create_company --name "Client SARL" --admin-e
 6. [Paie Bénin : paramètres, calcul, périmètre](docs/06-paie-benin.md)
 7. [Architecture technique](docs/07-architecture.md)
 8. [Proposer le produit à des entreprises](docs/08-commercialisation.md)
-9. [Circuits employé ↔ RH, matériel, réunions, empreinte digitale](docs/09-circuits-employe-rh.md)
+9. [Circuits employé ↔ RH, matériel, réunions, empreinte digitale, frais, formations, discipline](docs/09-circuits-employe-rh.md)
 
 ## Points d'attention
 - **HTTPS obligatoire** en production (la caméra du navigateur l'exige hors `localhost`).

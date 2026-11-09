@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Mes mesures{% endblock %}
+{% block content %}
+<h2 class="mb-4 text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Mes mesures disciplinaires</h2>
+<div class="card"><div class="is-scrollbar-hidden min-w-full overflow-x-auto"><table class="w-full text-left"><thead><tr><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Date</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Nature</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Motif</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5"></th></tr></thead><tbody>
+{% for s in sanctions %}<tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500"><td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ s.date|date:"d/m/Y" }}</td><td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ s.get_kind_display }}</td><td class="px-4 py-3 text-sm sm:px-5">{{ s.reason }}</td>
+<td class="whitespace-nowrap px-4 py-3 sm:px-5"><a target="_blank" class="text-primary hover:underline dark:text-accent-light" href="{% url 'discipline:pdf' s.pk %}">PDF</a>{% if not s.acknowledged_at %} · <form method="post" action="{% url 'discipline:acknowledge' s.pk %}" class="inline">{% csrf_token %}<button class="text-success hover:underline">J'ai pris connaissance</button></form>{% else %} · lu le {{ s.acknowledged_at|date:"d/m/Y" }}{% endif %}</td></tr>
+{% empty %}<tr><td colspan="4" class="px-5 py-10 text-center text-slate-400">Aucune mesure.</td></tr>{% endfor %}</tbody></table></div></div>
+{% endblock %}

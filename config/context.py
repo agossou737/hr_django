@@ -87,6 +87,22 @@ SECTIONS = [
         ],
     ),
     (
+        "expenses", "Notes de frais", "cash", STAFF,
+        [
+            ("Mes notes de frais", "expenses:mine", STAFF),
+            ("Notes à valider", "expenses:pending", {"admin", "hr", "manager"}),
+            ("Toutes les notes", "expenses:list", HR),
+        ],
+    ),
+    (
+        "training", "Formations", "star", STAFF,
+        [("Mes formations", "training:mine", STAFF), ("Catalogue et inscriptions", "training:list", HR)],
+    ),
+    (
+        "discipline", "Discipline", "mail", STAFF,
+        [("Mes mesures", "discipline:mine", {"manager", "employee"}), ("Mesures disciplinaires", "discipline:list", HR)],
+    ),
+    (
         "assets", "Matériel", "tool", STAFF,
         [("Inventaire", "assets:list", HR), ("Mon matériel", "assets:mine", STAFF)],
     ),
