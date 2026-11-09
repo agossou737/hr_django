@@ -2,9 +2,10 @@ from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.http import Http404
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView, View
 
-from companies.exports import csv_response
+from companies.exports import FORMATS, export_table
 from accounts.mixins import CompanyFormMixin, CompanyQuerysetMixin, HRRequiredMixin
 
 from .forms import ContractForm, DepartmentForm, EmployeeForm, PositionForm
@@ -37,7 +38,7 @@ class EmployeeListView(HRRequiredMixin, CompanyQuerysetMixin, ListView):
         return qs
 
     def get(self, request, *args, **kwargs):
-        if request.GET.get("export") == "csv":
+        if request.GET.get("export") in FORMATS:
             rows = [
                 [e.matricule, e.last_name, e.first_name, e.get_gender_display(), e.birth_date, e.email, e.phone,
                  e.department or "", e.position or "", e.hire_date, e.get_status_display(), e.cnss_number, e.ifu]
@@ -45,7 +46,8 @@ class EmployeeListView(HRRequiredMixin, CompanyQuerysetMixin, ListView):
             ]
             header = ["Matricule", "Nom", "Prénoms", "Sexe", "Naissance", "E-mail", "Téléphone", "Département",
                       "Poste", "Embauche", "Statut", "N° CNSS", "IFU"]
-            return csv_response("employes.csv", header, rows)
+            return export_table(request.GET["export"], "employes", "Liste des employés", header, rows,
+                                request.user.company)
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -277,3 +279,101 @@ class ContractDeleteView(HRRequiredMixin, EmployeeScopedMixin, CompanyQuerysetMi
     def form_valid(self, form):
         messages.success(self.request, "Contrat supprimé.")
         return super().form_valid(form)
+
+
+# ------------------------------------------------------------ Import en masse
+from django.http import HttpResponse  # noqa: E402
+
+from . import importer  # noqa: E402
+
+SESSION_KEY = "employee_import"
+
+
+class ImportTemplateView(HRRequiredMixin, View):
+    def get(self, request):
+        response = HttpResponse(
+            importer.template_xlsx(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = 'attachment; filename="modele-import-employes.xlsx"'
+        return response
+
+
+class ImportView(HRRequiredMixin, TemplateView):
+    template_name = "employees/import.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["max_rows"] = importer.MAX_ROWS
+        return ctx
+
+    def post(self, request, *args, **kwargs):
+        upload = request.FILES.get("file")
+        if upload is None:
+            messages.error(request, "Choisissez un fichier.")
+            return redirect("employees:import")
+        try:
+            rows = importer.read_rows(upload)
+        except importer.ImportFileError as exc:
+            messages.error(request, str(exc))
+            return redirect("employees:import")
+        update = request.POST.get("update_existing") == "on"
+        analysis = importer.analyse(request.user.company, rows, update)
+        request.session[SESSION_KEY] = {"company": request.user.company_id, "analysis": analysis, "filename": upload.name}
+        return redirect("employees:import_preview")
+
+
+class ImportPreviewView(HRRequiredMixin, TemplateView):
+    template_name = "employees/import_preview.html"
+
+    def get_stored(self):
+        stored = self.request.session.get(SESSION_KEY)
+        if not stored or stored.get("company") != self.request.user.company_id:
+            return None
+        return stored
+
+    def get(self, request, *args, **kwargs):
+        if self.get_stored() is None:
+            messages.error(request, "Aucun import en attente.")
+            return redirect("employees:import")
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        stored = self.get_stored()
+        a = stored["analysis"]
+        ctx.update(filename=stored["filename"], analysis=a, preview=a["create"][:15],
+                   updates=a["update"][:15], counts={k: len(v) for k, v in a.items()})
+        return ctx
+
+
+class ImportConfirmView(HRRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request):
+        stored = request.session.get(SESSION_KEY)
+        if not stored or stored.get("company") != request.user.company_id:
+            messages.error(request, "Aucun import en attente.")
+            return redirect("employees:import")
+        created, updated = importer.apply(request.user.company, stored["analysis"])
+        request.session.pop(SESSION_KEY, None)
+        messages.success(request, f"Import terminé : {created} employé(s) créé(s), {updated} mis à jour.")
+        return redirect("employees:list")
+
+
+class ImportErrorsView(HRRequiredMixin, View):
+    def get(self, request):
+        stored = request.session.get(SESSION_KEY)
+        if not stored or stored.get("company") != request.user.company_id:
+            raise Http404
+        rows = [[e["line"], e["name"], " ; ".join(e["errors"])] for e in stored["analysis"]["errors"]]
+        return export_table("xlsx", "erreurs-import", "Erreurs d'import", ["Ligne", "Employé", "Erreurs"], rows,
+                            request.user.company)
+
+
+class ImportCancelView(HRRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request):
+        request.session.pop(SESSION_KEY, None)
+        return redirect("employees:list")

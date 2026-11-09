@@ -26,6 +26,7 @@
 {% if payslips %}
 <div class="mt-4 flex flex-wrap gap-2">
   <a class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90" href="{% url 'payroll:period_export' period.pk 'xlsx' %}">Journal Excel</a>
+  <a class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90" href="{% url 'payroll:period_export' period.pk 'pdf' %}">Journal PDF</a>
   <a class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90" href="{% url 'payroll:period_export' period.pk 'csv' %}">Journal CSV</a>
   <a class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90" href="{% url 'payroll:period_export' period.pk 'cnss' %}">État CNSS (CSV)</a>
 </div>

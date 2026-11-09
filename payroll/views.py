@@ -142,6 +142,11 @@ class PeriodExportView(PeriodMixin, View):
             )
             response["Content-Disposition"] = f'attachment; filename="{name}.xlsx"'
             return response
+        if fmt == "pdf":
+            from companies.exports import pdf_response
+
+            return pdf_response(f"{name}.pdf", f"Journal de paie — {period.label}", JOURNAL_HEADER,
+                                list(_journal_rows(period)), period.company.name)
         if fmt == "cnss":
             header = ["N° CNSS", "Matricule", "Nom", "Prénoms", "Base cotisable", "CNSS salarié", "CNSS employeur"]
             rows = [[p.employee.cnss_number, p.employee.matricule, p.employee.last_name, p.employee.first_name,

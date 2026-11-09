@@ -5,6 +5,12 @@ from . import views
 app_name = "employees"
 
 urlpatterns = [
+    path("import/", views.ImportView.as_view(), name="import"),
+    path("import/modele/", views.ImportTemplateView.as_view(), name="import_template"),
+    path("import/apercu/", views.ImportPreviewView.as_view(), name="import_preview"),
+    path("import/confirmer/", views.ImportConfirmView.as_view(), name="import_confirm"),
+    path("import/erreurs/", views.ImportErrorsView.as_view(), name="import_errors"),
+    path("import/annuler/", views.ImportCancelView.as_view(), name="import_cancel"),
     path("", views.EmployeeListView.as_view(), name="list"),
     path("nouveau/", views.EmployeeCreateView.as_view(), name="create"),
     path("<int:pk>/", views.EmployeeDetailView.as_view(), name="detail"),

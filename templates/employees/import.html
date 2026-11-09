@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Importer des employés{% endblock %}
+{% block content %}
+<div class="mb-4"><a href="{% url 'employees:list' %}" class="text-sm text-slate-400 hover:text-primary">← Employés</a><h2 class="mt-1 text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Importer des employés</h2>
+<p class="text-xs-plus text-slate-400 dark:text-navy-300">Excel (.xlsx) ou CSV, jusqu'à {{ max_rows }} lignes. Vous verrez un aperçu avec les erreurs avant toute écriture.</p></div>
+<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+<div class="card p-5"><h3 class="font-medium">1. Télécharger le modèle</h3>
+<p class="mt-2 text-sm text-slate-500 dark:text-navy-200">Il contient toutes les colonnes (identité, contact, CNSS, IFU, département, poste, salaire, contrat…) et une feuille d'aide. Les départements et postes inconnus sont créés automatiquement.</p>
+<a href="{% url 'employees:import_template' %}" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90 mt-4 self-start">Télécharger le modèle Excel</a></div>
+<form method="post" enctype="multipart/form-data" class="card p-5 space-y-4">{% csrf_token %}
+<h3 class="font-medium">2. Envoyer votre fichier</h3>
+<input type="file" name="file" accept=".xlsx,.csv,.txt" required class="form-input w-full rounded-lg border border-slate-300 p-2 dark:border-navy-450">
+<label class="flex items-start gap-2 text-sm"><input type="checkbox" name="update_existing" class="form-checkbox is-basic size-5 shrink-0 rounded-sm border-slate-400/70 checked:border-primary checked:bg-primary"><span>Mettre à jour les employés déjà présents (reconnus par matricule ou e-mail). Sinon ils sont ignorés.</span></label>
+<button class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">Analyser le fichier</button></form></div>
+{% endblock %}

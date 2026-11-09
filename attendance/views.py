@@ -14,7 +14,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import CreateView, DeleteView, ListView, TemplateView, UpdateView
 
 from accounts.mixins import CompanyFormMixin, CompanyQuerysetMixin, HRRequiredMixin, KioskRequiredMixin
-from companies.exports import csv_response
+from companies.exports import FORMATS, export_table
 from employees.models import Department, Employee
 
 from . import services
@@ -330,12 +330,13 @@ class MonthlyReportView(HRRequiredMixin, TemplateView):
         return year, month
 
     def get(self, request, *args, **kwargs):
-        if request.GET.get("export") == "csv":
+        if request.GET.get("export") in FORMATS:
             year, month = self._period()
             dept = request.GET.get("department", "")
             rows, _ = monthly_summary(request.user.company, year, month, dept if dept.isdigit() else None)
-            return csv_response(
-                f"presences_{year}-{month:02d}.csv",
+            return export_table(
+                request.GET["export"], f"presences_{year}-{month:02d}",
+                f"Rapport de présence — {MONTHS_FR[month - 1]} {year}",
                 ["Matricule", "Nom", "Département", "Jours présent", "Retards", "Minutes de retard",
                  "Heures travaillées", "Jours de congé", "Absences"],
                 [
@@ -348,6 +349,7 @@ class MonthlyReportView(HRRequiredMixin, TemplateView):
                     ]
                     for r in rows
                 ],
+                request.user.company,
             )
         return super().get(request, *args, **kwargs)
 
