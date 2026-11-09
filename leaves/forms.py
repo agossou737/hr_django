@@ -3,7 +3,7 @@ from django import forms
 from employees.forms import CompanyModelForm, StyledFormMixin
 
 from . import services
-from .models import LeaveRequest, LeaveType
+from .models import LeaveRequest, LeaveType, PermissionRequest
 
 
 class LeaveTypeForm(CompanyModelForm):
@@ -26,7 +26,7 @@ class LeaveRequestForm(StyledFormMixin, forms.ModelForm):
 
     class Meta:
         model = LeaveRequest
-        fields = ["leave_type", "start_date", "end_date", "reason"]
+        fields = ["leave_type", "start_date", "end_date", "reason", "replacement"]
         widgets = {
             "start_date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
             "end_date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
@@ -37,6 +37,11 @@ class LeaveRequestForm(StyledFormMixin, forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.company, self.employee = company, employee
         self.fields["leave_type"].queryset = LeaveType.objects.filter(company=company)
+        from employees.models import Employee
+
+        self.fields["replacement"].queryset = Employee.objects.filter(company=company).exclude(
+            status=Employee.Status.LEFT).exclude(pk=getattr(employee, "pk", None))
+        self.fields["replacement"].help_text = "Collègue qui assurera votre intérim. Il devra accepter."
         self._style_fields()
 
     def clean(self):
@@ -58,6 +63,12 @@ class LeaveRequestForm(StyledFormMixin, forms.ModelForm):
                 raise forms.ValidationError(
                     f"Solde insuffisant : {left} jour(s) restant(s) pour « {leave_type.name} » en {start.year}."
                 )
+        repl = data.get("replacement")
+        if repl is not None:
+            from .models import LeaveRequest as LR
+
+            if LR.objects.filter(employee=repl, status="approved", start_date__lte=end, end_date__gte=start).exists():
+                raise forms.ValidationError(f"{repl.full_name} est lui-même en congé sur cette période.")
         data["days"] = days
         return data
 
@@ -68,6 +79,8 @@ class LeaveRequestForm(StyledFormMixin, forms.ModelForm):
         obj.status = LeaveRequest.Status.PENDING
         if not obj.leave_type.needs_approval:
             obj.status = LeaveRequest.Status.APPROVED
+        obj.replacement_status = (LeaveRequest.ReplacementStatus.PENDING if obj.replacement_id
+                                  else LeaveRequest.ReplacementStatus.NONE)
         if commit:
             obj.save()
         return obj
@@ -85,7 +98,8 @@ class HRLeaveRequestForm(LeaveRequestForm):
         self.fields["employee_field"].queryset = Employee.objects.filter(company=company).exclude(
             status=Employee.Status.LEFT
         )
-        self.order_fields(["employee_field", "leave_type", "start_date", "end_date", "reason"])
+        self.order_fields(["employee_field", "leave_type", "start_date", "end_date", "reason", "replacement"])
+        self.fields["replacement"].queryset = self.fields["employee_field"].queryset
         self._style_fields()
 
     def clean(self):
@@ -93,3 +107,39 @@ class HRLeaveRequestForm(LeaveRequestForm):
         if self.employee is None:
             return super(LeaveRequestForm, self).clean()
         return super().clean()
+
+
+class PermissionRequestForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = PermissionRequest
+        fields = ["date", "start_time", "end_time", "reason"]
+        widgets = {
+            "date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+            "start_time": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
+            "end_time": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
+            "reason": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, company, employee, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.company, self.employee = company, employee
+        self._style_fields()
+
+    def clean(self):
+        data = super().clean()
+        d, a, b = data.get("date"), data.get("start_time"), data.get("end_time")
+        if a and b and b <= a:
+            raise forms.ValidationError("L'heure de fin doit être après l'heure de début.")
+        if d and self.employee and PermissionRequest.objects.filter(
+            employee=self.employee, date=d, status__in=["pending", "approved"],
+            start_time__lt=b or a, end_time__gt=a or b,
+        ).exists():
+            raise forms.ValidationError("Une permission existe déjà sur ce créneau.")
+        return data
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        obj.company, obj.employee = self.company, self.employee
+        if commit:
+            obj.save()
+        return obj

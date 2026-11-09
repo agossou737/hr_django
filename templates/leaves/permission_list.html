@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load exports %}
+{% block title %}Toutes les permissions{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-center justify-between gap-2"><h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Toutes les permissions</h2>{% export_buttons %}</div>
+<div class="card"><div class="is-scrollbar-hidden min-w-full overflow-x-auto"><table class="w-full text-left">
+<thead><tr><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Réf.</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Employé</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Date</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Créneau</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Statut</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5"></th></tr></thead>
+<tbody>{% for p in permissions %}<tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
+<td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ p.reference }}</td><td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ p.employee.full_name }}</td><td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ p.date|date:"d/m/Y" }}</td><td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ p.start_time|time:"H:i" }} – {{ p.end_time|time:"H:i" }}</td><td class="whitespace-nowrap px-4 py-3 sm:px-5">{% include "leaves/_perm_badge.html" %}</td>
+<td class="whitespace-nowrap px-4 py-3 sm:px-5">{% if p.status == "approved" %}<a target="_blank" class="text-primary hover:underline dark:text-accent-light" href="{% url 'leaves:permission_pdf' p.pk %}">PDF</a>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">Aucune permission.</td></tr>{% endfor %}</tbody></table></div></div>
+{% if is_paginated %}<div class="mt-4 flex gap-2 text-sm">{% if page_obj.has_previous %}<a class="btn border border-slate-300" href="?page={{ page_obj.previous_page_number }}">Précédent</a>{% endif %}{% if page_obj.has_next %}<a class="btn border border-slate-300" href="?page={{ page_obj.next_page_number }}">Suivant</a>{% endif %}</div>{% endif %}
+{% endblock %}

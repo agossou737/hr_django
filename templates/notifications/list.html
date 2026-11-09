@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+<div class="mb-4 flex items-center justify-between"><h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Notifications</h2>
+<form method="post" action="{% url 'notifications:read_all' %}">{% csrf_token %}<button class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-100">Tout marquer comme lu</button></form></div>
+<div class="card divide-y divide-slate-200 dark:divide-navy-500">
+{% for n in notifications %}
+<a href="{% url 'notifications:open' n.pk %}" class="block px-4 py-3 hover:bg-slate-50 dark:hover:bg-navy-600">
+  <div class="flex items-center justify-between gap-3"><p class="{% if not n.is_read %}font-semibold{% endif %} text-slate-700 dark:text-navy-100">{% if not n.is_read %}<span class="mr-2 inline-block size-2 rounded-full bg-primary"></span>{% endif %}{{ n.title }}</p><span class="shrink-0 text-xs text-slate-400">{{ n.created_at|date:"d/m/Y H:i" }}</span></div>
+  {% if n.message %}<p class="mt-1 text-sm text-slate-500 dark:text-navy-200">{{ n.message|truncatechars:200 }}</p>{% endif %}
+</a>
+{% empty %}<p class="px-5 py-10 text-center text-slate-400">Aucune notification.</p>{% endfor %}
+</div>
+{% if is_paginated %}<div class="mt-4 flex justify-between text-sm"><span>Page {{ page_obj.number }} / {{ paginator.num_pages }}</span><div class="flex gap-2">
+{% if page_obj.has_previous %}<a class="btn border border-slate-300" href="?page={{ page_obj.previous_page_number }}">Précédent</a>{% endif %}
+{% if page_obj.has_next %}<a class="btn border border-slate-300" href="?page={{ page_obj.next_page_number }}">Suivant</a>{% endif %}</div></div>{% endif %}
+{% endblock %}

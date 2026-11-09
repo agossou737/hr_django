@@ -63,3 +63,10 @@ select.form-select { padding-right: 2.25rem; }
 .whitespace-pre-line{white-space:pre-line}
 .mb-2{margin-bottom:.5rem}
 @media (min-width:1024px){.lg\:grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}}
+
+/* Pastille de la cloche de notifications */
+.min-w-4{min-width:1rem}
+.-right-0\.5{right:-0.125rem}
+.-top-0\.5{top:-0.125rem}
+.text-\[10px\]{font-size:10px}
+.leading-4{line-height:1rem}

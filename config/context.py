@@ -10,6 +10,9 @@ ICONS = {
     "recruit": "M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z",
     "star": "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z",
     "folder": "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z",
+    "bell": "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9",
+    "mail": "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+    "tool": "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
     "cog": "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z",
 }
 
@@ -42,9 +45,20 @@ SECTIONS = [
         [
             ("Mes congés", "leaves:mine", STAFF),
             ("Demandes à traiter", "leaves:pending", {"admin", "hr", "manager"}),
+            ("Mes remplacements", "leaves:replacements", STAFF),
+            ("Mes permissions", "leaves:permission_mine", STAFF),
+            ("Permissions à traiter", "leaves:permission_pending", {"admin", "hr", "manager"}),
+            ("Toutes les permissions", "leaves:permission_list", HR),
             ("Toutes les demandes", "leaves:list", HR),
             ("Calendrier", "leaves:calendar", STAFF),
             ("Types de congés", "leaves:type_list", HR),
+        ],
+    ),
+    (
+        "explanations", "Explications", "mail", STAFF,
+        [
+            ("Mes demandes d'explication", "explanations:mine", {"manager", "employee"}),
+            ("Toutes les explications", "explanations:list", HR),
         ],
     ),
     (
@@ -125,6 +139,15 @@ def _build_nav(request, user):
     return sections
 
 
+def _unread(user):
+    try:
+        from notifications.services import unread_count
+
+        return unread_count(user)
+    except Exception:  # base non migrée, etc.
+        return 0
+
+
 def branding(request):
     """Nom du produit, navigation latérale et entreprise courante, pour tous les templates."""
     user = getattr(request, "user", None)
@@ -134,4 +157,5 @@ def branding(request):
         "APP_NAME": settings.APP_NAME,
         "APP_TAGLINE": settings.APP_TAGLINE,
         "nav_sections": _build_nav(request, user),
+        "unread_notifications": _unread(user) if authenticated and user.company_id else 0,
     }

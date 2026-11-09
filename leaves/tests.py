@@ -264,7 +264,7 @@ class SettingsAndUsersTests(Base):
         self.client.force_login(self.hr)
         r = self.client.post(reverse("companies:settings"), {
             "name": "Alpha SARL", "city": "Cotonou", "work_start_time": "07:30", "work_end_time": "16:30",
-            "late_tolerance_minutes": 5, "days": ["0", "1", "2", "3", "4", "5"]})
+            "late_tolerance_minutes": 5, "explanation_deadline_days": 2, "days": ["0", "1", "2", "3", "4", "5"]})
         self.assertEqual(r.status_code, 302)
         self.c1.refresh_from_db()
         self.assertEqual(self.c1.work_weekdays, {0, 1, 2, 3, 4, 5})

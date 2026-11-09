@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ exp.reference }}{% endblock %}
+{% block content %}
+{% with x=exp %}
+<div class="mx-auto max-w-4xl space-y-4">
+<div class="flex flex-wrap items-center justify-between gap-2"><div><h2 class="text-xl font-semibold text-slate-700 dark:text-navy-50">{{ exp.reference }} — {{ exp.subject }}</h2>
+<p class="text-sm text-slate-400">{{ exp.employee.full_name }} · émise le {{ exp.created_at|date:"d/m/Y" }} · réponse avant le {{ exp.deadline|date:"d/m/Y" }}</p></div>{% include "explanations/_badge.html" %}</div>
+<div class="card p-4 sm:p-5"><div class="mb-3 flex items-center justify-between"><h3 class="font-semibold text-slate-700 dark:text-navy-100">Demande de l'employeur</h3><a target="_blank" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-100" href="{% url 'explanations:pdf' exp.pk 'demande' %}">Voir le PDF</a></div>
+<p class="whitespace-pre-line text-sm text-slate-600 dark:text-navy-200">{{ exp.message|default:"—" }}</p></div>
+{% if can_answer %}
+<form method="post" action="{% url 'explanations:answer' exp.pk %}" class="card space-y-3 p-4 sm:p-5">{% csrf_token %}<h3 class="font-semibold text-slate-700 dark:text-navy-100">Votre réponse</h3>{% include "partials/form_fields.html" with form=answer_form %}
+<div class="flex justify-end"><button class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus">Envoyer ma réponse aux RH</button></div></form>
+{% elif exp.answered_at %}
+<div class="card p-4 sm:p-5"><div class="mb-3 flex items-center justify-between"><h3 class="font-semibold text-slate-700 dark:text-navy-100">Réponse de l'employé · {{ exp.answered_at|date:"d/m/Y H:i" }}</h3><a target="_blank" class="btn border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-100" href="{% url 'explanations:pdf' exp.pk 'reponse' %}">Voir le PDF de réponse</a></div>
+<p class="whitespace-pre-line text-sm text-slate-600 dark:text-navy-200">{{ exp.answer }}</p></div>
+{% else %}<div class="card p-4 text-sm text-warning">En attente de la réponse de l'employé{% if exp.reminders_sent %} ({{ exp.reminders_sent }} relance(s) envoyée(s)){% endif %}.</div>{% endif %}
+{% if can_decide %}
+<form method="post" class="card space-y-3 p-4 sm:p-5">{% csrf_token %}<h3 class="font-semibold text-slate-700 dark:text-navy-100">Décision des RH</h3>{% include "partials/form_fields.html" with form=decision_form %}
+<div class="flex justify-end gap-2"><button formaction="{% url 'explanations:decide' exp.pk 'reject' %}" class="btn border border-error font-medium text-error hover:bg-error/10">Non justifié</button><button formaction="{% url 'explanations:decide' exp.pk 'accept' %}" class="btn bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus">Justifié</button></div></form>
+{% elif exp.is_decided %}<div class="card p-4 text-sm"><b>Décision :</b> {{ exp.get_status_display }}{% if exp.decision_comment %} — {{ exp.decision_comment }}{% endif %}</div>{% endif %}
+{% if request.user.can_manage_hr and exp.is_open %}<form method="post" action="{% url 'explanations:cancel' exp.pk %}">{% csrf_token %}<button class="text-sm text-error hover:underline">Annuler cette demande</button></form>{% endif %}
+</div>
+{% endwith %}
+{% endblock %}

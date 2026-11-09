@@ -13,7 +13,7 @@
           <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ r.leave_type }}</td>
           <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ r.start_date|date:"d/m/Y" }} → {{ r.end_date|date:"d/m/Y" }}</td>
           <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ r.days|floatformat:"-1" }}</td>
-          <td class="px-4 py-3 text-sm text-slate-500 sm:px-5">{{ r.reason|default:"—"|truncatechars:60 }}</td>
+          <td class="px-4 py-3 text-sm text-slate-500 sm:px-5">{{ r.reason|default:"—"|truncatechars:60 }}{% if r.replacement %}<div class="text-xs {% if r.replacement_status == 'accepted' %}text-success{% elif r.replacement_status == 'declined' %}text-error{% else %}text-warning{% endif %}">Intérim : {{ r.replacement.full_name }} — {{ r.get_replacement_status_display }}</div>{% endif %}</td>
           <td class="px-4 py-3 sm:px-5">
             <form method="post" class="flex items-center gap-2">{% csrf_token %}
               <input name="comment" placeholder="Commentaire (facultatif)" class="form-input w-44 rounded-lg border border-slate-300 bg-transparent px-2 py-1.5 text-sm dark:border-navy-450">

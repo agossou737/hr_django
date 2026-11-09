@@ -15,8 +15,8 @@ from attendance.views import MONTHS_FR
 from employees.models import Employee
 
 from . import services
-from .forms import HRLeaveRequestForm, LeaveRequestForm, LeaveTypeForm
-from .models import LeaveRequest, LeaveType
+from .forms import HRLeaveRequestForm, LeaveRequestForm, LeaveTypeForm, PermissionRequestForm
+from .models import LeaveRequest, LeaveType, PermissionRequest
 
 
 class CompanyUserMixin(LoginRequiredMixin):
@@ -30,7 +30,7 @@ class CompanyUserMixin(LoginRequiredMixin):
 
 class ReviewerMixin(CompanyUserMixin):
     def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated and request.user.role not in ("admin", "hr", "manager"):
+        if request.user.is_authenticated and not services.is_reviewer(request.user):
             raise PermissionDenied
         return super().dispatch(request, *args, **kwargs)
 
@@ -79,8 +79,10 @@ class LeaveRequestCreateView(CompanyUserMixin, CreateView):
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
+        response = super().form_valid(form)
+        services.notify_new_request(self.object)
         messages.success(self.request, "Votre demande a été enregistrée.")
-        return super().form_valid(form)
+        return response
 
 
 class LeaveCancelView(CompanyUserMixin, View):
@@ -120,6 +122,8 @@ class LeaveReviewView(ReviewerMixin, View):
             raise PermissionDenied
         if not leave.is_pending:
             messages.error(request, "Cette demande a déjà été traitée.")
+        elif action == "approve" and services.replacement_blocks(leave) and not request.user.can_manage_hr:
+            messages.error(request, "Le remplaçant désigné n'a pas encore confirmé l'intérim.")
         else:
             services.review(leave, request.user, action == "approve", request.POST.get("comment", "").strip())
             messages.success(
@@ -275,3 +279,154 @@ class LeaveCalendarView(CompanyUserMixin, TemplateView):
             weekdays=["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
         )
         return ctx
+
+
+# ------------------------------------------------------------------ Intérim
+class ReplacementListView(CompanyUserMixin, TemplateView):
+    template_name = "leaves/replacements.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["requests"] = LeaveRequest.objects.filter(
+            company=self.request.user.company, replacement__user=self.request.user
+        ).exclude(status__in=["cancelled", "rejected"]).select_related("employee", "leave_type").order_by("-start_date")
+        return ctx
+
+
+class ReplacementRespondView(CompanyUserMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, pk, action):
+        leave = get_object_or_404(LeaveRequest, pk=pk, company=request.user.company, replacement__user=request.user)
+        if action not in ("accept", "decline"):
+            raise PermissionDenied
+        if leave.replacement_status != LeaveRequest.ReplacementStatus.PENDING or leave.status != "pending":
+            messages.error(request, "Cette demande d'intérim n'attend plus de réponse.")
+        else:
+            services.respond_replacement(leave, action == "accept", request.POST.get("comment", "").strip())
+            messages.success(request, "Intérim accepté." if action == "accept" else "Intérim refusé.")
+        return redirect("leaves:replacements")
+
+
+class LeavePdfView(CompanyUserMixin, View):
+    def get(self, request, pk):
+        from django.http import HttpResponse
+
+        from .pdfs import leave_pdf
+
+        leave = get_object_or_404(LeaveRequest.objects.select_related("employee__user", "leave_type", "replacement"),
+                                  pk=pk, company=request.user.company)
+        if not (request.user.can_manage_hr or leave.employee.user_id == request.user.pk) or leave.status != "approved":
+            raise PermissionDenied
+        resp = HttpResponse(leave_pdf(leave), content_type="application/pdf")
+        resp["Content-Disposition"] = f'inline; filename="conge-{leave.pk}.pdf"'
+        return resp
+
+
+# ---------------------------------------------------------------- Permissions
+class MyPermissionsView(CompanyUserMixin, TemplateView):
+    template_name = "leaves/permission_mine.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        emp = _my_employee(self.request.user)
+        ctx["employee"] = emp
+        ctx["permissions"] = emp.permission_requests.all() if emp else []
+        return ctx
+
+
+class PermissionCreateView(CompanyUserMixin, CreateView):
+    model = PermissionRequest
+    form_class = PermissionRequestForm
+    template_name = "form_page.html"
+    success_url = reverse_lazy("leaves:permission_mine")
+    extra_context = {"title": "Demande de permission", "cancel_url": reverse_lazy("leaves:permission_mine")}
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.company_id and _my_employee(request.user) is None:
+            messages.error(request, "Votre compte n'est lié à aucune fiche employé. Contactez les RH.")
+            return redirect("leaves:permission_mine")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update(company=self.request.user.company, employee=_my_employee(self.request.user))
+        return kwargs
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        services.notify_new_request(self.object)
+        messages.success(self.request, "Votre demande de permission a été envoyée.")
+        return response
+
+
+class PermissionCancelView(CompanyUserMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, pk):
+        p = get_object_or_404(PermissionRequest, pk=pk, company=request.user.company, employee__user=request.user)
+        if p.is_pending:
+            p.status = PermissionRequest.Status.CANCELLED
+            p.save(update_fields=["status"])
+            messages.success(request, "Demande annulée.")
+        return redirect("leaves:permission_mine")
+
+
+class PermissionPendingView(ReviewerMixin, TemplateView):
+    template_name = "leaves/permission_pending.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["permissions"] = services.reviewable_permissions(self.request.user)
+        return ctx
+
+
+class PermissionReviewView(ReviewerMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, pk, action):
+        p = get_object_or_404(PermissionRequest, pk=pk, company=request.user.company)
+        if action not in ("approve", "reject") or not services.can_review(request.user, p):
+            raise PermissionDenied
+        if not p.is_pending:
+            messages.error(request, "Cette demande a déjà été traitée.")
+        else:
+            services.review(p, request.user, action == "approve", request.POST.get("comment", "").strip())
+            messages.success(request, "Permission accordée." if action == "approve" else "Permission refusée.")
+        return redirect("leaves:permission_pending")
+
+
+class PermissionListView(HRRequiredMixin, CompanyQuerysetMixin, ListView):
+    model = PermissionRequest
+    template_name = "leaves/permission_list.html"
+    context_object_name = "permissions"
+    paginate_by = 25
+
+    def get(self, request, *args, **kwargs):
+        if request.GET.get("export") in ("csv", "xlsx", "pdf"):
+            from companies.exports import export_table
+
+            rows = [[p.reference, p.employee.matricule, p.employee.full_name, p.date, p.start_time.strftime("%H:%M"),
+                     p.end_time.strftime("%H:%M"), p.hours, p.get_status_display()] for p in self.get_queryset()]
+            return export_table(request.GET["export"], "permissions", "Demandes de permission",
+                                ["Réf.", "Matricule", "Employé", "Date", "De", "À", "Heures", "Statut"], rows,
+                                request.user.company)
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("employee")
+
+
+class PermissionPdfView(CompanyUserMixin, View):
+    def get(self, request, pk):
+        from django.http import HttpResponse
+
+        from .pdfs import permission_pdf
+
+        p = get_object_or_404(PermissionRequest.objects.select_related("employee__user"), pk=pk,
+                              company=request.user.company)
+        if not (request.user.can_manage_hr or p.employee.user_id == request.user.pk) or p.status != "approved":
+            raise PermissionDenied
+        resp = HttpResponse(permission_pdf(p), content_type="application/pdf")
+        resp["Content-Disposition"] = f'inline; filename="{p.reference}.pdf"'
+        return resp

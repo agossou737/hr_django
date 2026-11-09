@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     "recruitment",
     "evaluations",
     "documents",
+    "notifications",
+    "explanations",
 ]
 
 MIDDLEWARE = [
@@ -154,3 +156,15 @@ LOGGING = {
     "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "std"}},
     "root": {"handlers": ["console"], "level": config("LOG_LEVEL", default="INFO")},
 }
+
+# ---------------------------------------------------------------- E-mails
+# Sans configuration SMTP, les e-mails s'affichent dans la console (aucun envoi réel).
+EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = config("EMAIL_HOST", default="")
+EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="Ruche RH <no-reply@localhost>")
+# Adresse publique (https://rh.mon-domaine.bj) ajoutée aux liens des e-mails
+SITE_URL = config("SITE_URL", default="").rstrip("/")

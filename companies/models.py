@@ -23,6 +23,13 @@ class Company(models.Model):
     work_start_time = models.TimeField("Heure de début", default=datetime.time(8, 0))
     work_end_time = models.TimeField("Heure de fin", default=datetime.time(17, 0))
     late_tolerance_minutes = models.PositiveSmallIntegerField("Tolérance de retard (min)", default=10)
+    auto_explanation = models.BooleanField(
+        "Demande d'explication automatique en cas de retard", default=True,
+        help_text="Chaque pointage en retard génère une demande d'explication adressée à l'employé.",
+    )
+    explanation_deadline_days = models.PositiveSmallIntegerField(
+        "Délai de réponse (jours)", default=2, help_text="Au-delà, l'employé est relancé automatiquement."
+    )
     work_days = models.CharField(
         "Jours travaillés",
         max_length=20,

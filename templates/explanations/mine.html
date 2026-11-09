@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Mes explications{% endblock %}
+{% block content %}
+<h2 class="mb-4 text-xl font-semibold text-slate-700 dark:text-navy-50 lg:text-2xl">Mes demandes d'explication</h2>
+<div class="card"><div class="is-scrollbar-hidden min-w-full overflow-x-auto"><table class="is-hoverable w-full text-left">
+<thead><tr><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Réf.</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Objet</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Échéance</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">Statut</th><th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5"></th></tr></thead>
+<tbody>{% for x in explanations %}<tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
+<td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ x.reference }}</td><td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ x.subject }}</td><td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ x.deadline|date:"d/m/Y" }}</td><td class="whitespace-nowrap px-4 py-3 sm:px-5">{% include "explanations/_badge.html" %}</td>
+<td class="whitespace-nowrap px-4 py-3 sm:px-5"><a class="text-primary hover:underline dark:text-accent-light" href="{% url 'explanations:detail' x.pk %}">{% if x.is_pending %}Répondre{% else %}Voir{% endif %}</a></td></tr>
+{% empty %}<tr><td colspan="5" class="px-5 py-10 text-center text-slate-400">Aucune demande d'explication.</td></tr>{% endfor %}</tbody></table></div></div>
+{% endblock %}
