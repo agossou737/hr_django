@@ -1,4 +1,4 @@
-# JEV — Logiciel de gestion RH (Django)
+# HR Django — Logiciel de gestion RH (Django)
 
 Plateforme RH multi-entreprises pensée pour le marché béninois / zone OHADA, avec pointage par reconnaissance faciale (phase 2).
 
