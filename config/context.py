@@ -13,6 +13,11 @@ ICONS = {
     "bell": "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9",
     "mail": "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
     "tool": "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
+    "receipt": "M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z",
+    "academic": "M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z",
+    "shield": "M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285zM12 15.75h.008v.008H12v-.008z",
+    "cube": "M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9",
+    "group": "M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z",
     "cog": "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z",
 }
 
@@ -87,7 +92,7 @@ SECTIONS = [
         ],
     ),
     (
-        "expenses", "Notes de frais", "cash", STAFF,
+        "expenses", "Notes de frais", "receipt", STAFF,
         [
             ("Mes notes de frais", "expenses:mine", STAFF),
             ("Notes à valider", "expenses:pending", {"admin", "hr", "manager"}),
@@ -95,19 +100,19 @@ SECTIONS = [
         ],
     ),
     (
-        "training", "Formations", "star", STAFF,
+        "training", "Formations", "academic", STAFF,
         [("Mes formations", "training:mine", STAFF), ("Catalogue et inscriptions", "training:list", HR)],
     ),
     (
-        "discipline", "Discipline", "mail", STAFF,
+        "discipline", "Discipline", "shield", STAFF,
         [("Mes mesures", "discipline:mine", {"manager", "employee"}), ("Mesures disciplinaires", "discipline:list", HR)],
     ),
     (
-        "assets", "Matériel", "tool", STAFF,
+        "assets", "Matériel", "cube", STAFF,
         [("Inventaire", "assets:list", HR), ("Mon matériel", "assets:mine", STAFF)],
     ),
     (
-        "meetings", "Réunions", "calendar", STAFF,
+        "meetings", "Réunions", "group", STAFF,
         [("Mes réunions", "meetings:mine", STAFF), ("Toutes les réunions", "meetings:list", HR)],
     ),
     (
